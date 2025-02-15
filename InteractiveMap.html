@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Virtual Congress - House of Representatives Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Map container styling */
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+    /* Header styling */
+    header {
+      background-color: #5F9EA0; /* Smoky cadet blue */
+      color: white;
+      text-align: left;
+      padding: 20px;
+      font-family: 'Roboto', sans-serif;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    header h1, header h2 {
+      margin: 0;
+      font-weight: 700;
+    }
+    header h1 {
+      font-size: 1.5em;
+    }
+    header h2 {
+      font-size: 1.2em;
+    }
+    /* Navigation bar styling */
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #5F9EA0; /* Smoky cadet blue */
+      display: flex;
+      justify-content: flex-start;
+    }
+    nav ul li {
+      display: inline;
+    }
+    nav ul li a {
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+      font-family: 'Roboto', sans-serif;
+    }
+    nav ul li a:hover {
+      background-color: #4F8A8B; /* Slightly darker cadet blue for hover */
+    }
+    /* Footer styling */
+    footer {
+      background-color: #5F9EA0; /* Smoky cadet blue */
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+      font-family: 'Roboto', sans-serif;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+    }
+    /* Search container positioned on the RIGHT-CENTER side of the header */
+    #searchContainer {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background: white;
+      padding: 10px;
+      width: 350px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      font-family: 'Roboto', sans-serif;
+    }
+    #districtSearch {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: none; /* Remove border */
+      outline: none; /* Remove outline */
+    }
+    /* Container for preemptive search results */
+    #searchResults {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      font-family: 'Roboto', sans-serif;
+      color: black; /* Ensure text color is legible */
+      position: absolute;
+      width: 100%;
+      z-index: 1000;
+    }
+    .search-result {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.3s;
+    }
+    .search-result:hover {
+      background-color: #f0f0f0;
+    }
+    /* Sidebar for district details with Roboto font */
+    #districtDetails {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 1000;
+      background: white;
+      padding: 20px;
+      width: 400px;
+      height: 100%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      overflow-y: auto;
+      display: none;
+      font-family: 'Roboto', sans-serif;
+    }
+    #districtDetails img {
+      display: block;
+      margin: 0 auto 20px auto;
+      width: 150px;
+      height: auto;
+      border-radius: 5px;
+    }
+    #districtDetails div {
+      text-align: left;
+    }
+    #districtDetails .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 20px;
+      background: none;
+      border: none;
+    }
+    h2, p {
+      font-family: 'Roboto', sans-serif;
+    }
+    body {
+      background-color: #f4f4f4;
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div>
+      <h1>Virtual Congress</h1>
+      <h2>House of Representatives Map</h2>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#map">Map</a></li>
+        <li><a href="#districtData">District Data</a></li>
+        <li><a href="#searchContainer">Search</a></li>
+        <li><a href="notableCongresspeople.html">Notable Districts</a></li>
+      </ul>
+    </nav>
+    <!-- Search Container (on the right-center of the header) -->
+    <div id="searchContainer">
+      <input type="text" id="districtSearch" placeholder="Search for a district..." />
+      <!-- Preemptive search results will be rendered here -->
+      <div id="searchResults"></div>
+    </div>
+  </header>
+
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Add an ID to the district data section for navigation -->
+  <div id="districtData">
+    <h2>District Data</h2>
+    <p>
+      <b style="color: #78b6f0;">Dem-leaning Districts:</b>
+      <span id="demCount">0</span>
+    </p>
+    <p>
+      <b style="color: #ff3d3d;">Rep-leaning Districts:</b>
+      <span id="repCount">0</span>
+    </p>
+  </div>
+
+  <!-- District Details Sidebar (appears only when searching a district) -->
+  <div id="districtDetails">
+    <button class="close-btn">&times;</button>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Virtual Congress. All rights reserved.</p>
+  </footer>
+
+  <!-- Link to external JavaScript (ensure script.js implements the behaviors below) -->
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('click', function(event) {
+      const searchContainer = document.getElementById('searchContainer');
+      const searchResults = document.getElementById('searchResults');
+      if (!searchContainer.contains(event.target)) {
+        searchResults.style.display = 'none';
+      }
+    });
+
+    document.getElementById('districtSearch').addEventListener('focus', function() {
+      document.getElementById('searchResults').style.display = 'block';
+    });
+  </script>
+</body>
+</html>

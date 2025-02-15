@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Notable Congresspeople</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #5F9EA0; /* Smoky cadet blue */
+      color: white;
+      text-align: left;
+      padding: 20px;
+      font-family: 'Roboto', sans-serif;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5em;
+      font-weight: 700;
+    }
+    .container {
+      padding: 20px;
+    }
+    .person {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .person img {
+      width: 200px;
+      height: auto;
+      border-radius: 5px;
+      margin-left: 20px;
+    }
+    .person .details {
+      flex: 1;
+      text-align: center;
+    }
+    .person .details h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #5F9EA0; /* Same color as header */
+    }
+    .person .details p {
+      margin: 5px 0;
+      font-size: 1.1em;
+    }
+    .map-container {
+      width: 200px;
+      height: 200px;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-right: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Notable Congresspeople</h1>
+  </header>
+  <div class="container">
+    <!-- Example person entry -->
+    <div class="person">
+      <div class="map-container" id="map-CT-3"></div>
+      <div class="details">
+        <h2>Mathew Fields</h2>
+        <p><b>Title:</b> Speaker of the House</p>
+        <p><b>Party:</b> Democratic</p>
+        <p><b>District:</b> CT-3</p>
+      </div>
+      <img src="portraits/CT-3.jpg" alt="Speaker of the House">
+    </div>
+    <!-- Add more notable people here -->
+    <div class="person">
+      <div class="map-container" id="map-FL-8"></div>
+      <div class="details">
+        <h2>Blakemore Alexander</h2>
+        <p><b>Title:</b> Speaker Pro Tempore</p>
+        <p><b>Party:</b> Independent</p>
+        <p><b>District:</b> FL-8</p>
+      </div>
+    <!-- Add more notable people here -->
+    <div class="person">
+      <div class="map-container" id="map-NY-71"></div>
+      <div class="details">
+        <h2>Diana Allar Meyer</h2>
+        <p><b>Title:</b> Creator of This Map</p>
+        <p><b>Party:</b> Democratic</p>
+        <p><b>District:</b> NY-71 </p>
+      </div>
+      <img src="portraits/NY-71.jpg" alt="Diana Allar Meyer">
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fetch the GeoJSON data
+      fetch('districts_with_states.geojson')
+        .then(response => response.json())
+        .then(data => {
+          // Initialize maps for each notable person
+          initMap('map-CT-3', data, 'CT-3');
+          initMap('map-FL-8', data, 'FL-8');
+          initMap('map-NY-10', data, 'NY-10');
+          initMap('map-FL-5', data, 'FL-5');
+          initMap('map-IL-3', data, 'IL-3');
+          initMap('map-OH-8', data, 'OH-8');
+          initMap('map-GA-4', data, 'GA-4');
+          initMap('map-NY-71', data, 'NY-71');
+        })
+        .catch(err => console.error(err));
+    });
+
+    // Function to initialize a map for a given element ID and district key
+    function initMap(elementId, geojsonData, districtKey) {
+      const map = L.map(elementId).setView([37.8, -96], 4);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: 'Map data &copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Filter the GeoJSON data to get the specific district
+      const districtFeature = geojsonData.features.find(feature => {
+        const state = feature.properties.State || feature.properties.state || 'Unknown';
+        const districtId = feature.properties.District || feature.properties.district || feature.properties.id || 'Unknown';
+        const compositeKey = `${state}-${districtId}`;
+        return compositeKey === districtKey;
+      });
+
+      if (districtFeature) {
+        const districtLayer = L.geoJSON(districtFeature).addTo(map);
+        map.fitBounds(districtLayer.getBounds());
+      }
+    }
+  </script>
+</body>
+</html>
