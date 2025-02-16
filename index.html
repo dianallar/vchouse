@@ -4,7 +4,7 @@
   <title>Virtual Congress - House of Representatives Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       background-color: #f4f4f4;
@@ -117,14 +117,15 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       overflow-y: auto;
       display: none;
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Lato', sans-serif;
     }
     #districtDetails img {
       display: block;
       margin: 0 auto 20px auto;
-      width: 150px;
+      width: 200px;
       height: auto;
       border-radius: 5px;
+      border: 2px solid #ccc;
     }
     #districtDetails div {
       text-align: left;
@@ -171,6 +172,23 @@
     }
     #toggleButton:hover {
       background-color: #4F8A8B;
+    }
+    .popup-content {
+      text-align: center;
+    }
+    .popup-content hr {
+      margin: 20px 0;
+      border: 0;
+      border-top: 1px solid #ccc;
+    }
+    .popup-content .rep-name {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .popup-content .district-key {
+      font-size: 1em;
+      font-weight: bold;
+      color: #666;
     }
   </style>
 </head>

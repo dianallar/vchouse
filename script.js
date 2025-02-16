@@ -97,29 +97,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Build the popup content string
           const popupContent = `
-            <div style="display: flex; align-items: center;">
-              <div style="flex: 1;">
-                <strong>State:</strong> ${state}<br>
-                <strong>District ID:</strong> ${districtId}<br>
-                <strong>Representative:</strong> 
-                <span style="color: ${repColor}; font-weight: bold;">${representative}</span><br>
-                <strong>Partisan Lean:</strong> ${lean}<br>
-                <strong>2020 Presidential Votes (R):</strong> ${repVotes}<br>
-                <strong>2020 Presidential Votes (D):</strong> ${demVotes}<br>
-                <strong>Total Income:</strong> ${totalIncome}<br>
-                <strong>White Population:</strong> ${whitePop}<br>
-                <strong>Black Population:</strong> ${blackPop}<br>
-                <strong>Native Population:</strong> ${nativePop}<br>
-                <strong>Asian Population:</strong> ${asianPop}<br>
-                <strong>Pacific Islander Population:</strong> ${pacificPop}<br>
-                <strong>Latino Population:</strong> ${latinoPop}<br>
-                <strong>Multiracial Population:</strong> ${multiracialPop}<br>
-                <strong>GINI Index:</strong> ${giniIndex}
-              </div>
-              <div style="margin-left: 20px; text-align: center;">
-                <img src="portraits/${compositeKey}.jpg" alt="${repName}" style="width: 100px; height: auto; border-radius: 5px;">
-                <div style="margin-top: 5px; font-size: 12px;">${repName}</div>
-              </div>
+            <div class="popup-content">
+              <img src="portraits/${compositeKey}.jpg" alt="${repName}" class="popup-portrait">
+              <div class="rep-name">${repName}</div>
+              <div class="district-key">${compositeKey}</div>
+              <hr>
+              <strong>Partisan Lean:</strong> ${lean}<br>
+              <strong>2020 Presidential Votes (R):</strong> ${repVotes}<br>
+              <strong>2020 Presidential Votes (D):</strong> ${demVotes}<br>
+              <strong>Total Income:</strong> ${totalIncome}<br>
+              <strong>White Population:</strong> ${whitePop}<br>
+              <strong>Black Population:</strong> ${blackPop}<br>
+              <strong>Native Population:</strong> ${nativePop}<br>
+              <strong>Asian Population:</strong> ${asianPop}<br>
+              <strong>Pacific Islander Population:</strong> ${pacificPop}<br>
+              <strong>Latino Population:</strong> ${latinoPop}<br>
+              <strong>Multiracial Population:</strong> ${multiracialPop}<br>
+              <strong>GINI Index:</strong> ${giniIndex}
             </div>
           `;
 
@@ -190,12 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     detailsPanel.innerHTML = `
       <button class="close-btn">&times;</button>
-      <img src="portraits/${compositeKey}.jpg" alt="${repName}">
+      <img src="portraits/${compositeKey}.jpg" alt="${repName}" class="popup-portrait">
+      <div class="rep-name">${repName}</div>
+      <div class="district-key">${compositeKey}</div>
+      <hr>
       <div>
-        <strong>State:</strong> ${state}<br>
-        <strong>District ID:</strong> ${districtId}<br>
-        <strong>Representative:</strong> 
-        <span style="color: ${repColor}; font-weight: bold;">${representative}</span><br>
         <strong>Partisan Lean:</strong> ${lean}<br>
         <strong>2020 Presidential Votes (R):</strong> ${repVotes}<br>
         <strong>2020 Presidential Votes (D):</strong> ${demVotes}<br>
