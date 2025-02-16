@@ -1,12 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Create the map
+  // Create the main map
   const map = L.map('map').setView([37.8, -96], 4);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: 'Map data &copy; OpenStreetMap contributors'
-  })
-  .addTo(map);
+  }).addTo(map);
+
+  // Create the mini-map
+  const miniMap = L.map('miniMap', {
+    attributionControl: false,
+    zoomControl: false
+  }).setView([37.8, -96], 4);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: 'Map data &copy; OpenStreetMap contributors'
+  }).addTo(miniMap);
 
   // Global variables within this closure
   let allDistricts = []; // Array to store each feature and its layer
@@ -95,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             feature.properties.DMultiracial || feature.properties.multiracialPop || 'N/A';
           const giniIndex = feature.properties.DGINI || feature.properties.giniIndex || 'N/A';
 
-          // Revert the popup content to its previous state
+          // Build the popup content string
           const popupContent = `
             <div style="display: flex; align-items: center;">
               <div style="flex: 1;">
@@ -126,7 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
           // Bind the popup to the layer and add a click handler for the side panel
           layer.bindPopup(popupContent);
           layer.on('click', () => {
-            showDistrictDetails(feature);
             map.fitBounds(layer.getBounds());
           });
 
@@ -184,9 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const giniIndex = props.DGINI || props.giniIndex || 'N/A';
 
     const party =
-      representative.includes('(D)') ? 'D' :
-      representative.includes('(R)') ? 'R' :
-      representative.includes('(I)') ? 'I' : 'Unknown';
+      representative.includes('(D)') ? 'D' : representative.includes('(R)') ? 'R' : representative.includes('(I)') ? 'I' : 'Unknown';
     const repColor = party === 'D' ? '#0000FF' : party === 'R' ? '#FF0000' : party === 'I' ? '#800080' : '#000000';
     const repName = representative.replace(/\([DRI]\)/, '').trim();
 
@@ -210,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <strong>Multiracial Population:</strong> ${multiracialPop}<br>
         <strong>GINI Index:</strong> ${giniIndex}
       </div>
+      <div id="miniMap" style="height: 200px; margin-top: 20px;"></div>
     `;
     detailsPanel.style.display = 'block';
     detailsPanel.style.right = '0';
@@ -219,6 +227,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#districtDetails .close-btn').addEventListener('click', () => {
       detailsPanel.style.display = 'none';
     });
+
+    // Update the mini-map to show the selected district's boundaries
+    miniMap.eachLayer(layer => {
+      miniMap.removeLayer(layer);
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: 'Map data &copy; OpenStreetMap contributors'
+    }).addTo(miniMap);
+    const districtLayer = L.geoJSON(feature);
+    districtLayer.addTo(miniMap);
+    miniMap.fitBounds(districtLayer.getBounds());
   }
 
   // Function to update the search results list
