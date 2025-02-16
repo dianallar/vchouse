@@ -248,14 +248,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to toggle visibility of inhabited districts
   function toggleInhabitedDistricts() {
-    const showInhabited = document.getElementById('toggleInhabited').checked;
+    const showInhabited = document.getElementById('toggleButton').textContent.includes('Show Inhabited');
     visibleDistricts.forEach(d => {
-      if (showInhabited && repMap[d.feature.properties.State + '-' + d.feature.properties.District] === 'N/A') {
+      const compositeKey = `${d.feature.properties.State}-${d.feature.properties.District}`;
+      if (showInhabited && repMap[compositeKey] === 'N/A') {
         map.removeLayer(d.layer);
       } else {
         map.addLayer(d.layer);
       }
     });
+    document.getElementById('toggleButton').textContent = showInhabited ? 'Show All Districts' : 'Show Inhabited Districts Only';
   }
 
   // Example helper functions
@@ -304,5 +306,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Add event listener for the toggle button
-  document.getElementById('toggleInhabited').addEventListener('change', toggleInhabitedDistricts);
+  document.getElementById('toggleButton').addEventListener('click', toggleInhabitedDistricts);
 });
