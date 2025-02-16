@@ -6,13 +6,14 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* Map container styling */
-    #map {
-      height: 600px;
-      width: 100%;
-      flex: 1;
+    body {
+      background-color: #f4f4f4;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
-    /* Header styling */
     header {
       background-color: #5F9EA0; /* Smoky cadet blue */
       color: white;
@@ -32,7 +33,6 @@
     header h2 {
       font-size: 1.2em;
     }
-    /* Navigation bar styling */
     nav ul {
       list-style-type: none;
       margin: 0;
@@ -56,19 +56,11 @@
     nav ul li a:hover {
       background-color: #4F8A8B; /* Slightly darker cadet blue for hover */
     }
-    /* Footer styling */
-    footer {
-      background-color: #5F9EA0; /* Smoky cadet blue */
-      color: white;
-      text-align: center;
-      padding: 10px 0;
-      font-family: 'Roboto', sans-serif;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
-      position: sticky;
-      bottom: 0;
+    #map {
+      height: 600px;
       width: 100%;
+      flex: 1;
     }
-    /* Search container positioned on the RIGHT-CENTER side of the header */
     #searchContainer {
       position: absolute;
       top: 50%;
@@ -90,7 +82,6 @@
       border-radius: 5px;
       outline: none;
     }
-    /* Container for preemptive search results */
     #searchResults {
       margin-top: 10px;
       max-height: 200px;
@@ -114,7 +105,6 @@
     .search-result:hover {
       background-color: #f0f0f0;
     }
-    /* Sidebar for district details with Roboto font */
     #districtDetails {
       position: fixed;
       top: 0;
@@ -148,16 +138,16 @@
       background: none;
       border: none;
     }
-    h2, p {
+    footer {
+      background-color: #5F9EA0; /* Smoky cadet blue */
+      color: white;
+      text-align: center;
+      padding: 10px 0;
       font-family: 'Roboto', sans-serif;
-    }
-    body {
-      background-color: #f4f4f4;
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+      position: sticky;
+      bottom: 0;
+      width: 100%;
     }
     #districtData {
       padding: 20px;
@@ -165,6 +155,22 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       margin: 20px;
       border-radius: 5px;
+    }
+    h2, p {
+      font-family: 'Roboto', sans-serif;
+    }
+    #toggleButton {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #5F9EA0;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+    }
+    #toggleButton:hover {
+      background-color: #4F8A8B;
     }
   </style>
 </head>
@@ -205,6 +211,11 @@
       <b style="color: #ff3d3d;">Rep-leaning Districts:</b>
       <span id="repCount">0</span>
     </p>
+    <p>
+      <b>Claimed Districts:</b>
+      <span id="claimedCount">0</span>
+    </p>
+    <button id="toggleButton">Show Inhabited Districts Only</button>
   </div>
 
   <!-- District Details Sidebar (appears only when searching a district) -->

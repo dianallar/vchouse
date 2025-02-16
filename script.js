@@ -10,11 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Global variables within this closure
   let allDistricts = []; // Array to store each feature and its layer
+  let visibleDistricts = []; // Array to store visible districts
   const searchInput = document.getElementById('districtSearch');
   const searchResults = document.getElementById('searchResults');
   const detailsPanel = document.getElementById('districtDetails');
   const closeBtn = document.querySelector('#districtDetails .close-btn');
   let repMap = {}; // Will hold the representatives mapping
+  let demCount = 0;
+  let repCount = 0;
+  let claimedCount = 0;
 
   // Fetch the representatives data
   fetch('representatives.json')
@@ -30,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Populate the repMap with the representatives data
       Object.keys(representatives).forEach(key => {
         repMap[key] = representatives[key];
+        if (representatives[key] !== 'N/A') {
+          claimedCount++;
+        }
       });
 
       // Fetch the GeoJSON data
@@ -122,11 +129,24 @@ document.addEventListener('DOMContentLoaded', () => {
             showDistrictDetails(feature);
             map.fitBounds(layer.getBounds());
           });
+
+          // Count partisan lean
+          if (lean.includes('D')) {
+            demCount++;
+          } else if (lean.includes('R')) {
+            repCount++;
+          }
         }
       });
 
       // Add the GeoJSON layer to the map
       geojsonLayer.addTo(map);
+      visibleDistricts = allDistricts;
+
+      // Update district data counts
+      document.getElementById('demCount').textContent = demCount;
+      document.getElementById('repCount').textContent = repCount;
+      document.getElementById('claimedCount').textContent = claimedCount;
     })
     .catch(err => console.error(err));
 
@@ -226,6 +246,18 @@ document.addEventListener('DOMContentLoaded', () => {
     searchResults.style.display = results.length ? 'block' : 'none';
   }
 
+  // Function to toggle visibility of inhabited districts
+  function toggleInhabitedDistricts() {
+    const showInhabited = document.getElementById('toggleInhabited').checked;
+    visibleDistricts.forEach(d => {
+      if (showInhabited && repMap[d.feature.properties.State + '-' + d.feature.properties.District] === 'N/A') {
+        map.removeLayer(d.layer);
+      } else {
+        map.addLayer(d.layer);
+      }
+    });
+  }
+
   // Example helper functions
 
   function classifyPartisanLean(props) {
@@ -270,4 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
       default:         return '#D3D3D3';
     }
   }
+
+  // Add event listener for the toggle button
+  document.getElementById('toggleInhabited').addEventListener('change', toggleInhabitedDistricts);
 });
