@@ -15,11 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.querySelector('#districtDetails .close-btn');
   let repMap = {}; // Will hold the representatives mapping
 
-  // Fetch the representative mapping first...
-  fetch('representatives.json')
-    .then(response => response.json())
-    .then(data => {
-      repMap = data; // Save mapping for later use
+fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson')
+  .then(response => response.json())
+  .then(data => {
+    // Use the GeoJSON data
+    console.log(data);
+  })
+  .catch(error => console.error('Error loading GeoJSON:', error));
+
 
       // Then fetch the GeoJSON data
       return fetch('districts_with_states.geojson');
