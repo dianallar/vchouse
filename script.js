@@ -259,5 +259,4 @@ fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.ge
       case 'Safe D':   return '#0000FF';
       default:         return '#D3D3D3';
     }
-  }
-});
+  };
