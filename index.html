@@ -10,6 +10,7 @@
     #map {
       height: 600px;
       width: 100%;
+      flex: 1;
     }
     /* Header styling */
     header {
@@ -61,11 +62,11 @@
       color: white;
       text-align: center;
       padding: 10px 0;
-      position: fixed;
-      width: 100%;
-      bottom: 0;
       font-family: 'Roboto', sans-serif;
       box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+      position: sticky;
+      bottom: 0;
+      width: 100%;
     }
     /* Search container positioned on the RIGHT-CENTER side of the header */
     #searchContainer {
@@ -79,13 +80,15 @@
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       font-family: 'Roboto', sans-serif;
+      z-index: 1000;
     }
     #districtSearch {
       width: 100%;
       padding: 8px;
       box-sizing: border-box;
-      border: none; /* Remove border */
-      outline: none; /* Remove outline */
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
     }
     /* Container for preemptive search results */
     #searchResults {
@@ -113,7 +116,7 @@
     }
     /* Sidebar for district details with Roboto font */
     #districtDetails {
-      position: absolute;
+      position: fixed;
       top: 0;
       right: 0;
       z-index: 1000;
@@ -151,6 +154,17 @@
     body {
       background-color: #f4f4f4;
       font-family: 'Roboto', sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    #districtData {
+      padding: 20px;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin: 20px;
+      border-radius: 5px;
     }
   </style>
 </head>
