@@ -16,7 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.querySelector('#districtDetails .close-btn');
   let repMap = {}; // Will hold the representatives mapping
 
-  fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson')
+  // Fetch the representatives data
+  fetch('path/to/representatives.json')
+    .then(response => response.json())
+    .then(representatives => {
+      // Populate the repMap with the representatives data
+      representatives.forEach(rep => {
+        const compositeKey = `${rep.state}-${rep.district}`;
+        repMap[compositeKey] = rep.name;
+      });
+
+      // Fetch the GeoJSON data
+      return fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson');
+    })
     .then(response => response.json())
     .then(data => {
       // Use the GeoJSON data
