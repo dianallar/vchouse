@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: 'Map data &copy; OpenStreetMap contributors'
-  }).addTo(map);
+  })
+  .addTo(map);
 
   // Global variables within this closure
   let allDistricts = []; // Array to store each feature and its layer
@@ -20,8 +21,9 @@ fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.ge
   .then(data => {
     // Use the GeoJSON data
     console.log(data);
-  .catch(error => console.error('Error loading GeoJSON:', error));
-  }}
+  }) // <-- Correctly closing the `.then()`
+  .catch(error => console.error('Error loading GeoJSON:', error)); // <-- Placing `.catch()` outside properly
+
 
       // Then fetch the GeoJSON data
       return fetch('districts_with_states.geojson');
