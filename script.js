@@ -20,9 +20,8 @@ fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.ge
   .then(data => {
     // Use the GeoJSON data
     console.log(data);
-  })
   .catch(error => console.error('Error loading GeoJSON:', error));
-
+  }}
 
       // Then fetch the GeoJSON data
       return fetch('districts_with_states.geojson');
