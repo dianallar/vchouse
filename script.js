@@ -22,15 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(representatives => {
       console.log('Representatives data:', representatives); // Debugging log
 
-      // Check if representatives is an array
-      if (!Array.isArray(representatives)) {
-        throw new Error('Representatives data is not an array');
+      // Check if representatives is an object
+      if (typeof representatives !== 'object' || representatives === null) {
+        throw new Error('Representatives data is not an object');
       }
 
       // Populate the repMap with the representatives data
-      representatives.forEach(rep => {
-        const compositeKey = `${rep.state}-${rep.district}`;
-        repMap[compositeKey] = rep.name;
+      Object.keys(representatives).forEach(key => {
+        repMap[key] = representatives[key];
       });
 
       // Fetch the GeoJSON data
