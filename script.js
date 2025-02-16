@@ -20,6 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
   fetch('path/to/representatives.json')
     .then(response => response.json())
     .then(representatives => {
+      console.log('Representatives data:', representatives); // Debugging log
+
+      // Check if representatives is an array
+      if (!Array.isArray(representatives)) {
+        throw new Error('Representatives data is not an array');
+      }
+
       // Populate the repMap with the representatives data
       representatives.forEach(rep => {
         const compositeKey = `${rep.state}-${rep.district}`;
