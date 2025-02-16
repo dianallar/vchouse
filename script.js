@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: 'Map data &copy; OpenStreetMap contributors'
-  }).addTo(map);
+  })
+  .addTo(map);
 
   // Global variables within this closure
   let allDistricts = []; // Array to store each feature and its layer
@@ -15,11 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.querySelector('#districtDetails .close-btn');
   let repMap = {}; // Will hold the representatives mapping
 
-  // Fetch the representative mapping first...
-  fetch('representatives.json')
-    .then(response => response.json())
-    .then(data => {
-      repMap = data; // Save mapping for later use
+fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson')
+  .then(response => response.json())
+  .then(data => {
+    // Use the GeoJSON data
+    console.log(data);
+  }) // <-- Correctly closing the `.then()`
+  .catch(error => console.error('Error loading GeoJSON:', error)); // <-- Placing `.catch()` outside properly
+
 
       // Then fetch the GeoJSON data
       return fetch('districts_with_states.geojson');
@@ -255,5 +259,4 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'Safe D':   return '#0000FF';
       default:         return '#D3D3D3';
     }
-  }
-});
+  };
