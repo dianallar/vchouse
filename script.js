@@ -16,22 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.querySelector('#districtDetails .close-btn');
   let repMap = {}; // Will hold the representatives mapping
 
-fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson')
-  .then(response => response.json())
-  .then(data => {
-    // Use the GeoJSON data
-    console.log(data);
-  }) // <-- Correctly closing the `.then()`
-  .catch(error => console.error('Error loading GeoJSON:', error)); // <-- Placing `.catch()` outside properly
-
-
-      // Then fetch the GeoJSON data
-      return fetch('districts_with_states.geojson');
-    })
+  fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson')
     .then(response => response.json())
-    .then(geojsonData => {
+    .then(data => {
+      // Use the GeoJSON data
+      console.log(data);
+
       // Create the GeoJSON layer with style and feature callbacks
-      const geojsonLayer = L.geoJSON(geojsonData, {
+      const geojsonLayer = L.geoJSON(data, {
         style: feature => {
           const lean = classifyPartisanLean(feature.properties);
           return {
@@ -259,4 +251,5 @@ fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.ge
       case 'Safe D':   return '#0000FF';
       default:         return '#D3D3D3';
     }
-  };
+  }
+});
