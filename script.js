@@ -178,14 +178,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const giniIndex = props.DGINI || props.giniIndex || 'N/A';
 
     const party =
-      representative.includes('(D)') ? 'D' : representative.includes('(R)') ? 'R' : 'Unknown';
-    const repColor = party === 'D' ? '#0000FF' : party === 'R' ? '#FF0000' : '#000000';
-    const repName = representative.replace(/\([DR]\)/, '').trim();
+      representative.includes('(D)') ? 'D' :
+      representative.includes('(R)') ? 'R' :
+      representative.includes('(I)') ? 'I' : 'Unknown';
+    const repColor = party === 'D' ? '#0000FF' : party === 'R' ? '#FF0000' : party === 'I' ? '#800080' : '#000000';
+    const repName = representative.replace(/\([DRI]\)/, '').trim();
 
     detailsPanel.innerHTML = `
       <button class="close-btn">&times;</button>
       <img src="portraits/${compositeKey}.jpg" alt="${repName}" class="popup-portrait">
-      <div class="rep-name">${repName}</div>
+      <div class="rep-name" style="color: ${repColor};">${repName}</div>
       <div class="district-key">${compositeKey}</div>
       <hr>
       <div>
@@ -230,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
       resultItem.style.borderBottom = '1px solid #eee';
       resultItem.textContent = `${state}-${districtId}: ${representative}`;
       resultItem.addEventListener('click', () => {
-        map.fitBounds(d.layer.getBounds());
         showDistrictDetails(d.feature);
       });
 
