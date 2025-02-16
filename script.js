@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let repMap = {}; // Will hold the representatives mapping
 
   // Fetch the representatives data
-  fetch('path/to/representatives.json')
+  fetch('representatives.json')
     .then(response => response.json())
     .then(representatives => {
       // Populate the repMap with the representatives data
