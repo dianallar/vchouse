@@ -119,7 +119,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       // Fetch the GeoJSON data
-      fetch('districts_with_states.geojson')
+      fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson')
         .then(response => response.json())
         .then(data => {
           // Initialize maps for each notable person
