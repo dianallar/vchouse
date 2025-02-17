@@ -22,6 +22,7 @@
       font-family: 'Roboto', sans-serif;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       position: relative;
+      z-index: 1000;
     }
     header h1, header h2 {
       margin: 0;
@@ -57,9 +58,9 @@
       background-color: #4F8A8B; /* Slightly darker cadet blue for hover */
     }
     #map {
-      height: 600px;
-      width: 100%;
       flex: 1;
+      height: calc(100vh - 160px); /* Adjust height to account for header and footer */
+      width: 100%;
     }
     #searchContainer {
       position: absolute;
