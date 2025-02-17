@@ -259,6 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
       resultItem.textContent = `${state}-${districtId}: ${representative}`;
       resultItem.addEventListener('click', () => {
         showDistrictDetails(d.feature);
+        map.fitBounds(d.layer.getBounds()); // Zoom in on the district
       });
 
       searchResults.appendChild(resultItem);
