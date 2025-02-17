@@ -58,8 +58,15 @@
       background-color: #4F8A8B; /* Slightly darker cadet blue for hover */
     }
     #map {
+display: flex;
+      justify-content: center;
+      align-items: center;
       height: 600px; /* Set a fixed height for the map */
       width: 100%;
+    }
+#senateMap {
+      max-width: 100%;
+      height: auto;
     }
     #searchContainer {
       position: absolute;
@@ -214,7 +221,8 @@
         <li><a href="#searchContainer">Search</a></li>
         <li><a href="notableCongresspeople.html">Notable Districts</a></li>
         
-      </ul>
+  
+    </ul>
     </nav>
     <!-- Search Container (on the right-center of the header) -->
     <div id="searchContainer">
