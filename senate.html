@@ -58,13 +58,13 @@
       background-color: #4F8A8B; /* Slightly darker cadet blue for hover */
     }
     #map {
-display: flex;
+      display: flex;
       justify-content: center;
       align-items: center;
-      height: 600px; /* Set a fixed height for the map */
+      height: calc(100vh - 160px); /* Adjust height to account for header and footer */
       width: 100%;
     }
-#senateMap {
+    #senateMap {
       max-width: 100%;
       height: auto;
     }
@@ -165,7 +165,7 @@ display: flex;
       bottom: 0;
       width: 100%;
     }
-    #TheSenate {
+    #districtData {
       padding: 20px;
       background: white;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
@@ -220,9 +220,7 @@ display: flex;
         <li><a href="#districtData">District Data</a></li>
         <li><a href="#searchContainer">Search</a></li>
         <li><a href="notableCongresspeople.html">Notable Districts</a></li>
-        
-  
-    </ul>
+      </ul>
     </nav>
     <!-- Search Container (on the right-center of the header) -->
     <div id="searchContainer">
