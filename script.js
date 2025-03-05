@@ -152,6 +152,31 @@ document.addEventListener('DOMContentLoaded', () => {
       geojsonLayer.addTo(map);
       visibleDistricts = allDistricts;
 
+      // Add event listener for toggle button
+      const toggleButton = document.getElementById('toggleButton');
+      toggleButton.addEventListener('click', () => {
+        const showInhabited = toggleButton.textContent.includes('Show Inhabited');
+        
+        allDistricts.forEach(d => {
+          const state = d.feature.properties.State || d.feature.properties.state;
+          const district = d.feature.properties.District || d.feature.properties.district;
+          const compositeKey = `${state}-${district}`;
+          
+          if (showInhabited) {
+            // When showing inhabited only
+            if (repMap[compositeKey] === 'N/A' || repMap[compositeKey] === 'Unknown') {
+              map.removeLayer(d.layer);
+            }
+          } else {
+            // When showing all districts
+            map.addLayer(d.layer);
+          }
+        });
+        
+        // Update button text
+        toggleButton.textContent = showInhabited ? 'Show All Districts' : 'Show Inhabited Districts Only';
+      });
+
       // Update district data counts
       document.getElementById('demCount').textContent = demCount;
       document.getElementById('repCount').textContent = repCount;
