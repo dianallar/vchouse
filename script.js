@@ -269,27 +269,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to toggle visibility of inhabited districts
   function toggleInhabitedDistricts() {
-    const showInhabited = document.getElementById('toggleButton').textContent.includes('Show Inhabited');
+    const button = document.getElementById('toggleButton');
+    const showInhabited = button.textContent.includes('Show Inhabited');
     
-    visibleDistricts.forEach(d => {
+    // Store current map state to avoid unnecessary operations
+    const currentlyDisplayed = new Set();
+    map.eachLayer(layer => {
+      if (layer.feature) {
+        currentlyDisplayed.add(layer);
+      }
+    });
+
+    allDistricts.forEach(d => {
       const state = d.feature.properties.State || d.feature.properties.state;
       const district = d.feature.properties.District || d.feature.properties.district;
       const compositeKey = `${state}-${district}`;
       
       if (showInhabited) {
-        // When showing inhabited only, remove layers with 'N/A' representatives
-        if (repMap[compositeKey] === 'N/A') {
-          map.removeLayer(d.layer);
+        // When showing inhabited only
+        if (repMap[compositeKey] === 'N/A' || repMap[compositeKey] === 'Unknown') {
+          if (currentlyDisplayed.has(d.layer)) {
+            map.removeLayer(d.layer);
+          }
         }
       } else {
-        // When showing all, add back all layers
-        map.addLayer(d.layer);
+        // When showing all districts
+        if (!currentlyDisplayed.has(d.layer)) {
+          map.addLayer(d.layer);
+        }
       }
     });
     
     // Update button text
-    document.getElementById('toggleButton').textContent = 
-      showInhabited ? 'Show All Districts' : 'Show Inhabited Districts Only';
+    button.textContent = showInhabited ? 'Show All Districts' : 'Show Inhabited Districts Only';
   }
 
   // Example helper functions
