@@ -166,6 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // When showing inhabited only
             if (repMap[compositeKey] === 'N/A' || repMap[compositeKey] === 'Unknown') {
               map.removeLayer(d.layer);
+            } else {
+              map.addLayer(d.layer); // Make sure inhabited districts are visible
             }
           } else {
             // When showing all districts
@@ -373,7 +375,4 @@ document.addEventListener('DOMContentLoaded', () => {
       default:         return '#D3D3D3';
     }
   }
-
-  // Add event listener for the toggle button
-  document.getElementById('toggleButton').addEventListener('click', toggleInhabitedDistricts);
 });
