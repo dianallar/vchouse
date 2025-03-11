@@ -1,9 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const senateMap = document.getElementById('senateMap');
+  // Initialize the map
+  const map = L.map('map').setView([37.8, -96], 4);
+  
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Store references to DOM elements
   const detailsPanel = document.getElementById('districtDetails');
   const searchInput = document.getElementById('districtSearch');
   const searchResults = document.getElementById('searchResults');
-  const closeBtn = document.querySelector('#districtDetails .close-btn');
 
   // Example data for Senators
   const senators = {
@@ -90,6 +98,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add more superstates and their senators as needed
   };
 
+  // Function to get color based on party majority in superstate
+  function getColor(superstate) {
+    const senatorList = senators[superstate] || [];
+    let demCount = 0;
+    let repCount = 0;
+    
+    senatorList.forEach(senator => {
+      if (senator.name.includes('(D)')) demCount++;
+      if (senator.name.includes('(R)')) repCount++;
+    });
+
+    if (demCount > repCount) return '#78b6f0';
+    if (repCount > demCount) return '#ff3d3d';
+    return '#808080';
+  }
+
   // Function to show Senator details in the sidebar
   function showSenatorDetails(superstate, index = 0) {
     const senatorList = senators[superstate];
@@ -134,25 +158,59 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Add event listeners to the SVG elements
-  senateMap.addEventListener('load', () => {
-    const svgDoc = senateMap.contentDocument;
-    const states = svgDoc.querySelectorAll('.state');
+  // Fetch and add the GeoJSON layer
+  fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson')
+    .then(response => response.json())
+    .then(data => {
+      // Create the GeoJSON layer
+      const geojsonLayer = L.geoJSON(data, {
+        style: feature => ({
+          fillColor: getColor(feature.properties.superstate),
+          weight: 1,
+          opacity: 1,
+          color: 'white',
+          fillOpacity: 0.7
+        }),
+        onEachFeature: (feature, layer) => {
+          // Add click handler
+          layer.on('click', () => {
+            const superstate = feature.properties.superstate;
+            if (senators[superstate]) {
+              showSenatorDetails(superstate);
+            }
+          });
 
-    states.forEach(state => {
-      state.addEventListener('click', () => {
-        const superstate = state.id; // Assuming each state has an ID corresponding to the superstate
-        showSenatorDetails(superstate);
+          // Add hover effect
+          layer.on('mouseover', () => {
+            layer.setStyle({
+              weight: 2,
+              fillOpacity: 0.9
+            });
+          });
+
+          layer.on('mouseout', () => {
+            layer.setStyle({
+              weight: 1,
+              fillOpacity: 0.7
+            });
+          });
+        }
+      }).addTo(map);
+
+      // Update the search functionality
+      searchInput.addEventListener('input', e => {
+        const term = e.target.value.toLowerCase();
+        const results = Object.keys(senators).filter(superstate => 
+          superstate.toLowerCase().includes(term) ||
+          senators[superstate].some(senator => 
+            senator.name.toLowerCase().includes(term) ||
+            senator.state.toLowerCase().includes(term)
+          )
+        );
+        updateSearchResults(results);
       });
-    });
-  });
-
-  // Search functionality: filter features based on user input
-  searchInput.addEventListener('input', e => {
-    const term = e.target.value.toLowerCase();
-    const results = Object.keys(senators).filter(superstate => superstate.toLowerCase().includes(term));
-    updateSearchResults(results);
-  });
+    })
+    .catch(err => console.error('Error loading GeoJSON:', err));
 
   // Function to update the search results list
   function updateSearchResults(results) {
@@ -175,4 +233,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     searchResults.style.display = results.length ? 'block' : 'none';
   }
+
+  // Update counts in the UI
+  function updateSenateCounts() {
+    let totalDem = 0;
+    let totalRep = 0;
+
+    Object.values(senators).forEach(senatorList => {
+      senatorList.forEach(senator => {
+        if (senator.name.includes('(D)')) totalDem++;
+        if (senator.name.includes('(R)')) totalRep++;
+      });
+    });
+
+    document.getElementById('demCount').textContent = totalDem;
+    document.getElementById('repCount').textContent = 
+      `${totalRep} ${totalRep > totalDem ? '(Republican Majority)' : ''}`;
+  }
+
+  // Call updateSenateCounts when the page loads
+  updateSenateCounts();
 });
