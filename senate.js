@@ -160,57 +160,75 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Fetch and add the GeoJSON layer
   fetch('VCStates.geojson')
-    .then(response => response.json())
-    .then(data => {
-      // Create the GeoJSON layer
-      const geojsonLayer = L.geoJSON(data, {
-        style: feature => ({
-          fillColor: getColor(feature.properties.superstate),
-          weight: 1,
-          opacity: 1,
-          color: 'white',
-          fillOpacity: 0.7
-        }),
-        onEachFeature: (feature, layer) => {
-          // Add click handler
-          layer.on('click', () => {
-            const superstate = feature.properties.superstate;
-            if (senators[superstate]) {
-              showSenatorDetails(superstate);
-            }
-          });
+    .then(response => response.text()) // Change to text() first
+    .then(text => {
+      try {
+        const data = JSON.parse(text); // Manually parse JSON
+        
+        // Create the GeoJSON layer
+        const geojsonLayer = L.geoJSON(data, {
+          style: feature => ({
+            fillColor: getColor(feature.properties.name), // Changed to 'name' property
+            weight: 1,
+            opacity: 1,
+            color: 'white',
+            fillOpacity: 0.7
+          }),
+          onEachFeature: (feature, layer) => {
+            const superstate = feature.properties.name; // Changed to 'name' property
+            
+            // Add popup with state info
+            layer.bindPopup(`
+              <div class="popup-content">
+                <strong>${superstate}</strong><br>
+                ${senators[superstate] ? senators[superstate].map(s => s.name).join('<br>') : 'No senators'}
+              </div>
+            `);
 
-          // Add hover effect
-          layer.on('mouseover', () => {
-            layer.setStyle({
-              weight: 2,
-              fillOpacity: 0.9
+            // Add click handler
+            layer.on('click', () => {
+              if (senators[superstate]) {
+                showSenatorDetails(superstate);
+              }
             });
-          });
 
-          layer.on('mouseout', () => {
-            layer.setStyle({
-              weight: 1,
-              fillOpacity: 0.7
+            // Add hover effects
+            layer.on('mouseover', () => {
+              layer.setStyle({
+                weight: 2,
+                fillOpacity: 0.9
+              });
             });
-          });
-        }
-      }).addTo(map);
 
-      // Update the search functionality
-      searchInput.addEventListener('input', e => {
-        const term = e.target.value.toLowerCase();
-        const results = Object.keys(senators).filter(superstate => 
-          superstate.toLowerCase().includes(term) ||
-          senators[superstate].some(senator => 
-            senator.name.toLowerCase().includes(term) ||
-            senator.state.toLowerCase().includes(term)
-          )
-        );
-        updateSearchResults(results);
-      });
+            layer.on('mouseout', () => {
+              layer.setStyle({
+                weight: 1,
+                fillOpacity: 0.7
+              });
+            });
+          }
+        }).addTo(map);
+
+        // Fit map to GeoJSON bounds
+        map.fitBounds(geojsonLayer.getBounds());
+      } catch (e) {
+        console.error('Error parsing GeoJSON:', e);
+      }
     })
     .catch(err => console.error('Error loading GeoJSON:', err));
+
+  // Update the search functionality
+  searchInput.addEventListener('input', e => {
+    const term = e.target.value.toLowerCase();
+    const results = Object.keys(senators).filter(superstate => 
+      superstate.toLowerCase().includes(term) ||
+      senators[superstate].some(senator => 
+        senator.name.toLowerCase().includes(term) ||
+        senator.state.toLowerCase().includes(term)
+      )
+    );
+    updateSearchResults(results);
+  });
 
   // Function to update the search results list
   function updateSearchResults(results) {
