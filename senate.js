@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Fetch and add the GeoJSON layer
-  fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson')
+  fetch('VCStates.geojson')
     .then(response => response.json())
     .then(data => {
       // Create the GeoJSON layer
