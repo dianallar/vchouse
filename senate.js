@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Fetch and add the GeoJSON layer
-  fetch('VCStates.geojson')
+  fetch('VCStates.json')
     .then(response => response.text()) // Change to text() first
     .then(text => {
       try {
