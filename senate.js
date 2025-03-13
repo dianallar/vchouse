@@ -19,14 +19,14 @@ document.addEventListener('DOMContentLoaded', () => {
       {
         name: 'Adam Salinger (D)',
         termExpiration: 'May 2025',
-        portrait: 'Senate186\salinger.png',
+        portrait: 'Senate187\salinger.png',
         state: 'New York',
         class: 'Class 3'
       },
       {
-        name: 'Quantum K. Kearsley (D)',
+        name: 'George Wilson (D)',
         termExpiration: 'March 2025',
-        portrait: 'Senate186\kearsley.png',
+        portrait: 'Senate187\wilson.png',
         state: 'New York',
         class: 'Class 1'
       }
@@ -35,14 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
       {
         name: 'Joseph McCarthy (R)',
         termExpiration: 'April 2025',
-        portrait: 'Senate186\mccarthy.png',
+        portrait: 'Senate187\mccarthy.png',
         state: 'Wisconsin',
         class: 'Class 2'
       },
       {
         name: 'Threes Twos (D)',
         termExpiration: 'May 2025',
-        portrait: 'Senate186\twos.png',
+        portrait: 'Senate187\twos.png',
         state: 'Illinois',
         class: 'Class 3'
       }
@@ -51,14 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           name: 'Noah Constrictor (R)',
           termExpiration: 'May 2025',
-          portrait: 'Senate186\constrictor.png',
+          portrait: 'Senate187\constrictor.png',
           state: 'Arkansas',
           class: 'Class 3'
         },
         {
           name: 'Axel Hersey (R)',
           termExpiration: 'April 2025',
-          portrait: 'Senate186\hersey.png',
+          portrait: 'Senate187\hersey.png',
           state: 'Florida',
           class: 'Class 2'
         }
@@ -67,30 +67,30 @@ document.addEventListener('DOMContentLoaded', () => {
           {
             name: 'Aislinn Kinsley (R)',
             termExpiration: 'May 2025',
-            portrait: 'Senate186\kinsley.png',
-            state: 'UNDEFINED',
+            portrait: 'Senate187\kinsley.png',
+            state: 'Montana',
             class: 'Class 3'
           },
           {
-            name: 'Steven Miller (R)',
+            name: 'John Zimmermann (D)',
             termExpiration: 'March 2025',
-            portrait: 'Senate186\miller.png',
-            state: 'Montana',
+            portrait: 'Senate187\zimmermann.png',
+            state: 'Wyoming',
             class: 'Class 1'
           }
         ],
         'Pacifica': [
           {
-            name: 'Thomas Seaver (R)',
+            name: 'Neel McGavin (R)',
             termExpiration: 'March 2025',
-            portrait: 'Senate186\seaver.png',
-            state: 'Washington',
+            portrait: 'Senate187\mcgavin.png',
+            state: 'Arizona',
             class: 'Class 1'
           },
           {
             name: 'Kayla Whitmer (R)',
             termExpiration: 'April 2025',
-            portrait: 'Senate186\whitmer.png',
+            portrait: 'Senate187\whitmer.png',
             state: 'Hawaii',
             class: 'Class 2'
           }
