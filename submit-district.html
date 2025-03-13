@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Virtual Congress - District Submission</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background-color: #5F9EA0;
+      color: white;
+      text-align: left;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #5F9EA0;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #4F8A8B;
+    }
+    .success-message {
+      display: none;
+      color: green;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Virtual Congress</h1>
+    <h2>District Submission Form</h2>
+  </header>
+
+  <div class="container">
+    <form id="districtForm">
+      <div class="form-group">
+        <label for="fullName">Full Name:</label>
+        <input type="text" id="fullName" name="fullName" required>
+      </div>
+
+      <div class="form-group">
+        <label for="party">Party:</label>
+        <select id="party" name="party" required>
+          <option value="">Select a party</option>
+          <option value="D">Democratic</option>
+          <option value="R">Republican</option>
+          <option value="I">Independent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="district">Preferred District:</label>
+        <input type="text" id="district" name="district" placeholder="e.g. NY-3" required>
+      </div>
+
+      <div class="form-group">
+        <label for="faceclaim">Faceclaim Name:</label>
+        <input type="text" id="faceclaim" name="faceclaim" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Your Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+
+      <button type="submit">Submit Application</button>
+    </form>
+    <div id="successMessage" class="success-message">
+      Your submission has been received! We will review it shortly.
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("BNi7Dk1GAFTHJ-270");
+  </script>
+  <script src="submit-district.js"></script>
+</body>
+</html>
