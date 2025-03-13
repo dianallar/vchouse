@@ -123,9 +123,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const party = senator.name.includes('(D)') ? 'D' : senator.name.includes('(R)') ? 'R' : senator.name.includes('(I)') ? 'I' : 'Unknown';
     const repColor = party === 'D' ? '#0000FF' : party === 'R' ? '#FF0000' : party === 'I' ? '#800080' : '#000000';
 
+    // Update portrait path to use Senate187 folder
+    const portraitPath = `./Senate187/${senator.portrait}`;
+    const fallbackPortrait = './Senate187/default.png';
+
     detailsPanel.innerHTML = `
       <button class="close-btn">&times;</button>
-      <img src="portraits/${senator.portrait}" alt="${senator.name}" class="popup-portrait">
+      <img src="${portraitPath}" 
+           alt="${senator.name}" 
+           class="popup-portrait"
+           onerror="this.onerror=null; this.src='${fallbackPortrait}';">
       <div class="rep-name" style="color: ${repColor};">${senator.name}</div>
       <div class="district-key">${superstate}</div>
       <hr>
