@@ -19,14 +19,14 @@ document.addEventListener('DOMContentLoaded', () => {
       {
         name: 'Adam Salinger (D)',
         termExpiration: 'May 2025',
-        portrait: 'Senate187\salinger.png',
+        portrait: 'salinger.png',
         state: 'New York',
         class: 'Class 3'
       },
       {
         name: 'George Wilson (D)',
         termExpiration: 'March 2025',
-        portrait: 'Senate187\wilson.png',
+        portrait: 'wilson.png',
         state: 'New York',
         class: 'Class 1'
       }
@@ -35,14 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
       {
         name: 'Joseph McCarthy (R)',
         termExpiration: 'April 2025',
-        portrait: 'Senate187\mccarthy.png',
+        portrait: 'mccarthy.png',
         state: 'Wisconsin',
         class: 'Class 2'
       },
       {
         name: 'Threes Twos (D)',
         termExpiration: 'May 2025',
-        portrait: 'Senate187\twos.png',
+        portrait: 'twos.png',
         state: 'Illinois',
         class: 'Class 3'
       }
@@ -51,14 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           name: 'Noah Constrictor (R)',
           termExpiration: 'May 2025',
-          portrait: 'Senate187\constrictor.png',
+          portrait: 'constrictor.png',
           state: 'Arkansas',
           class: 'Class 3'
         },
         {
           name: 'Axel Hersey (R)',
           termExpiration: 'April 2025',
-          portrait: 'Senate187\hersey.png',
+          portrait: 'hersey.png',
           state: 'Florida',
           class: 'Class 2'
         }
@@ -67,14 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
           {
             name: 'Aislinn Kinsley (R)',
             termExpiration: 'May 2025',
-            portrait: 'Senate187\kinsley.png',
+            portrait: 'kinsley.png',
             state: 'Montana',
             class: 'Class 3'
           },
           {
             name: 'John Zimmermann (D)',
             termExpiration: 'March 2025',
-            portrait: 'Senate187\zimmermann.png',
+            portrait: 'zimmermann.png',
             state: 'Wyoming',
             class: 'Class 1'
           }
@@ -83,14 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
           {
             name: 'Neel McGavin (R)',
             termExpiration: 'March 2025',
-            portrait: 'Senate187\mcgavin.png',
+            portrait: 'mcgavin.png',
             state: 'Arizona',
             class: 'Class 1'
           },
           {
             name: 'Kayla Whitmer (R)',
             termExpiration: 'April 2025',
-            portrait: 'Senate187\whitmer.png',
+            portrait: 'whitmer.png',
             state: 'Hawaii',
             class: 'Class 2'
           }
