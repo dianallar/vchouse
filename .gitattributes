@@ -1,2 +1,2 @@
-*.geojson filter=lfs diff=lfs merge=lfs -text
+
 districts_with_states.geojson !text !filter !merge !diff
