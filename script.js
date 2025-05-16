@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // Fetch the GeoJSON data
-      return fetch('https://storage.googleapis.com/vchousemapgeojson/districts_with_states.geojson');
+      return fetch('districts_with_states.geojson');
     })
     .then(response => response.json())
     .then(data => {
