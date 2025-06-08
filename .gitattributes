@@ -1,1 +1,2 @@
+vchousemap2KeyComposites.geojson filter=lfs diff=lfs merge=lfs -text
 vchousemap2keycomposites.geojson !text !filter !merge !diff
