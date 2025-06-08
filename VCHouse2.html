@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCHouse.gov</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #005DA6;
+            --accent-gold: #B5985A;
+            --text-dark: #333333;
+            --background-light: #F5F5F5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-menu {
+            background-color: var(--secondary-blue);
+            padding: 0.5rem 2rem;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 1rem;
+            padding: 1rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #map {
+            height: 700px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .district-details {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .district-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        .representative-portrait {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 3px solid var(--primary-blue);
+        }
+
+        .representative-info {
+            flex: 1;
+        }
+
+        .representative-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .party-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .party-badge.democrat {
+            background-color: #e6f3ff;
+            color: #0015BC;
+        }
+
+        .party-badge.republican {
+            background-color: #ffe6e6;
+            color: #FF0000;
+        }
+
+        .party-badge.independent {
+            background-color: #f0e6ff;
+            color: #4B0082;
+        }
+
+        .district-link {
+            display: inline-block;
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .district-link:hover {
+            background-color: var(--secondary-blue);
+        }
+
+        .district-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .search-container {
+            margin-bottom: 1rem;
+        }
+
+        #districtSearch {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .user-controls {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+        }
+
+        .btn {
+            background-color: var(--secondary-blue);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-blue);
+        }
+
+        #searchResults {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .search-result {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .search-result:hover {
+            background-color: var(--background-light);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto; /* Allow scrolling */
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 5vh auto; /* Reduce top margin from 15% to 5vh */
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 90vh; /* Limit maximum height */
+            overflow-y: auto; /* Make content scrollable if needed */
+        }
+
+        /* Add smooth scrollbar for better UX */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: white;
+        }
+
+        .form-group input[type="file"] {
+            padding: 0.5rem 0;
+        }
+
+        .form-group small {
+            display: block;
+            color: #666;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-success {
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Quick Links Styles */
+        .quick-links {
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-links h3 {
+            color: var(--primary-blue);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .quick-links ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .quick-links a {
+            color: var(--secondary-blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.25rem 0;
+            display: block;
+        }
+
+        .quick-links a:hover {
+            color: var(--primary-blue);
+            text-decoration: underline;
+        }
+
+        /* Popup Styles */
+        .district-popup {
+            font-family: 'Source Sans Pro', sans-serif;
+            padding: 0;
+            margin: 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .popup-header {
+            background-color: #003366;
+            color: white;
+            margin: 0;
+            padding: 10px 15px;
+            font-size: 1.2em;
+        }
+
+        .popup-content {
+            padding: 15px;
+        }
+
+        .popup-row {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .popup-value {
+            color: #333;
+        }
+
+        .popup-value.democrat {
+            color: #0015BC;
+        }
+
+        .popup-value.republican {
+            color: #FF0000;
+        }
+
+        .popup-value.independent {
+            color: #4B0082;
+        }
+
+        .popup-footer {
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+
+        .popup-button {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .popup-button:hover {
+            background-color: #004c99;
+        }
+
+        /* District Details Styles */
+        .district-details {
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #003366;
+        }
+
+        .details-header h2 {
+            margin: 0;
+            color: #003366;
+        }
+
+        .party-indicator {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .party-indicator.democrat {
+            background-color: #e6f3ff;
+            color: #0015BC;
+        }
+
+        .party-indicator.republican {
+            background-color: #ffe6e6;
+            color: #FF0000;
+        }
+
+        .party-indicator.independent {
+            background-color: #f0e6ff;
+            color: #4B0082;
+        }
+
+        .details-section {
+            margin-bottom: 25px;
+        }
+
+        .details-section h3 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .details-item {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .details-label {
+            display: block;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .details-value {
+            color: #333;
+        }
+
+        .details-value a {
+            color: #003366;
+            text-decoration: none;
+        }
+
+        .details-value a:hover {
+            text-decoration: underline;
+        }
+
+        /* Coming Soon Styles */
+        .coming-soon-container {
+            position: relative;
+        }
+
+        .coming-soon-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+            border-radius: 8px;
+        }
+
+        .coming-soon-text {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            transform: rotate(-15deg);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: rgba(0, 51, 102, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Add these new styles for the blur effect */
+        .coming-soon-container > *:not(.coming-soon-overlay) {
+            filter: blur(4px);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>VCHouse.gov</h1>
+        <div class="user-menu">
+            <button class="btn" id="loginBtn">Login</button>
+            <button class="btn" id="registerBtn">Register</button>
+        </div>
+    </header>
+
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="VCHouse2.html">Home</a></li>
+            <li><a href="leadership.html">Leadership</a></li>
+            <li><a href="legislation.html">Legislation</a></li>
+            <li><a href="documents.html">Documents</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <aside class="sidebar">
+            <div class="quick-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="leadership.html">House Leadership</a></li>
+                    <li><a href="legislation.html">Recent Bills</a></li>
+                    <li><a href="documents.html">Key Documents</a></li>
+                    <li><a href="simulator.html">Election Simulator</a></li>
+                    <li><a href="terms.html">Terms & Definitions</a></li>
+                </ul>
+            </div>
+            <div class="search-container">
+                <input type="text" id="districtSearch" placeholder="Search districts...">
+                <div id="searchResults"></div>
+            </div>
+        </aside>
+
+        <div id="map"></div>
+
+        <aside class="district-details" id="districtDetails">
+            <div id="districtContent">
+                <div class="district-placeholder">
+                    Select a district to view representative information
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Login to VCHouse.gov</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div id="loginError" class="form-error"></div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content coming-soon-container">
+            <div class="coming-soon-overlay">
+                <div class="coming-soon-text">COMING SOON</div>
+            </div>
+            <span class="close-modal" onclick="closeModal('registerModal')">&times;</span>
+            <h2>Create an Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerFullName">Full Name</label>
+                    <input type="text" id="registerFullName" name="fullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerParty">Party</label>
+                    <select id="registerParty" name="party" required>
+                        <option value="">Select a party</option>
+                        <option value="D">Democratic</option>
+                        <option value="R">Republican</option>
+                        <option value="I">Independent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="registerPortrait">Portrait</label>
+                    <input type="file" id="registerPortrait" name="portraitFile" accept="image/*">
+                    <small>Optional - You can add a portrait later from your profile</small>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                <div id="registerError" class="form-error"></div>
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="vchouse2.js"></script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Leadership - VCHouse.gov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #005DA6;
+            --accent-gold: #B5985A;
+            --text-dark: #333333;
+            --background-light: #F5F5F5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .btn {
+            background-color: var(--secondary-blue);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-blue);
+        }
+
+        .leadership-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .leadership-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .leadership-header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .leadership-content {
+            padding: 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .leadership-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 1rem 0;
+            border: 3px solid var(--accent-gold);
+        }
+
+        .leadership-info {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .leadership-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .leadership-party {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .leadership-district {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .leadership-bio {
+            margin-top: 1rem;
+            text-align: left;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .section-title {
+            color: var(--primary-blue);
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .party-section {
+            margin-bottom: 3rem;
+        }
+
+        .party-title {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-gold);
+        }
+
+        .contact-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .contact-info p {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>House Leadership</h1>
+        <nav>
+            <a href="VCHouse2.html" class="btn">Back to Home</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2 class="section-title">House Leadership</h2>
+
+        <div class="party-section">
+            <h3 class="party-title">Majority Leadership</h3>
+            <div class="leadership-grid">
+                <div class="leadership-card">
+                    <div class="leadership-header">
+                        <h3>Speaker of the House</h3>
+                    </div>
+                    <div class="leadership-content">
+                        <img src="Portraits/ME-3.jpg" alt="Speaker" class="leadership-photo" onerror="this.src='Portraits/default.jpg'">
+                        <div class="leadership-info">
+                            <div class="leadership-name">Curtis Langley</div>
+                            <div class="leadership-party">Independent</div>
+                            <div class="leadership-district">Maine's 3rd Congressional District</div>
+                        </div>
+                        <div class="leadership-bio">
+                            <p>Elected as Speaker in May 2025, Langley has served as Governor of Olympia and Speaker <i>Pro Tempore.</i> </p>
+                        </div>
+                        <div class="contact-info">
+                            <p>Office: H-232 The Capitol</p>
+                            <p>Phone: (202) 225-0100</p>
+                            <p>Email: speaker@vchouse.gov</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="leadership-card">
+                    <div class="leadership-header">
+                        <h3>Majority Leader</h3>
+                    </div>
+                    <div class="leadership-content">
+                        <img src="Portraits/majority-leader.jpg" alt="Majority Leader" class="leadership-photo" onerror="this.src='Portraits/default.jpg'">
+                        <div class="leadership-info">
+                            <div class="leadership-name">Jacob Iron</div>
+                            <div class="leadership-party">Republican</div>
+                            <div class="leadership-district">Undefined</div>
+                        </div>
+                        <div class="leadership-bio">
+                            <p>Elected Majority Leader in May 2025.</p>
+                        </div>
+                        <div class="contact-info">
+                            <p>Office: H-148 The Capitol</p>
+                            <p>Phone: (202) 225-0200</p>
+                            <p>Email: majority.leader@vchouse.gov</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="leadership-card">
+                    <div class="leadership-header">
+                        <h3>Majority Whip</h3>
+                    </div>
+                    <div class="leadership-content">
+                        <img src="Portraits/majority-whip.jpg" alt="Majority Whip" class="leadership-photo" onerror="this.src='Portraits/default.jpg'">
+                        <div class="leadership-info">
+                            <div class="leadership-name">Michael Davis</div>
+                            <div class="leadership-party">Republican</div>
+                            <div class="leadership-district">Florida's 3rd District</div>
+                        </div>
+                        <div class="leadership-bio">
+                            <p>Responsible for mobilizing party votes on key legislation.</p>
+                        </div>
+                        <div class="contact-info">
+                            <p>Office: H-329 The Capitol</p>
+                            <p>Phone: (202) 225-0300</p>
+                            <p>Email: majority.whip@vchouse.gov</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="party-section">
+            <h3 class="party-title">Minority Leadership</h3>
+            <div class="leadership-grid">
+                <div class="leadership-card">
+                    <div class="leadership-header">
+                        <h3>Minority Leader</h3>
+                    </div>
+                    <div class="leadership-content">
+                        <img src="Portraits/IL-11.jpg" alt="Minority Leader" class="leadership-photo" onerror="this.src='Portraits/default.jpg'">
+                        <div class="leadership-info">
+                            <div class="leadership-name">Ducky Anka</div>
+                            <div class="leadership-party">Democrat</div>
+                            <div class="leadership-district">Illinois's 11th District</div>
+                        </div>
+                        <div class="leadership-bio">
+                            <p>Ducky Anka has been the Minority Leader of the House since April 2025. They have formerly represented Lincoln in the United States Senate and served as Ambassador to the United Nations.</p>
+                        </div>
+                        <div class="contact-info">
+                            <p>Office: H-204 The Capitol</p>
+                            <p>Phone: (202) 225-0400</p>
+                            <p>Email: minority.leader@vchouse.gov</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="leadership-card">
+                    <div class="leadership-header">
+                        <h3>Minority Whip</h3>
+                    </div>
+                    <div class="leadership-content">
+                        <img src="Portraits/minority-whip.jpg" alt="Minority Whip" class="leadership-photo" onerror="this.src='Portraits/default.jpg'">
+                        <div class="leadership-info">
+                            <div class="leadership-name">David Kim</div>
+                            <div class="leadership-party">Democrat</div>
+                            <div class="leadership-district">California's 5th District</div>
+                        </div>
+                        <div class="leadership-bio">
+                            <p>Coordinating minority party positions and vote counting.</p>
+                        </div>
+                        <div class="contact-info">
+                            <p>Office: H-156 The Capitol</p>
+                            <p>Phone: (202) 225-0500</p>
+                            <p>Email: minority.whip@vchouse.gov</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Default Profile Picture</title>
+</head>
+<body>
+    <canvas id="canvas" width="200" height="200" style="display:none;"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Draw background
+        ctx.fillStyle = '#003366';
+        ctx.fillRect(0, 0, 200, 200);
+
+        // Draw circle
+        ctx.beginPath();
+        ctx.arc(100, 100, 80, 0, Math.PI * 2);
+        ctx.fillStyle = '#005DA6';
+        ctx.fill();
+
+        // Draw text
+        ctx.font = 'bold 60px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('VC', 100, 100);
+
+        // Convert to blob and download
+        canvas.toBlob(function(blob) {
+            const link = document.createElement('a');
+            link.download = 'default.jpg';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }, 'image/jpeg', 0.95);
+    </script>
+</body>
+</html> 

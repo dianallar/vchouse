@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>District Information - VCHouse.gov</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/chart.js"></script>
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #005DA6;
+            --accent-gold: #B5985A;
+            --text-dark: #333333;
+            --background-light: #F5F5F5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-menu {
+            background-color: var(--secondary-blue);
+            padding: 0.5rem 2rem;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .district-page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: var(--secondary-blue);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .representative-info {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .representative-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .party-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid transparent;
+        }
+
+        .party-badge.democrat {
+            background-color: #e6f3ff;
+            color: #0015BC;
+            border-color: #0015BC;
+        }
+
+        .party-badge.republican {
+            background-color: #ffe6e6;
+            color: #FF0000;
+            border-color: #FF0000;
+        }
+
+        .party-badge.independent {
+            background-color: #f0e6ff;
+            color: #4B0082;
+            border-color: #4B0082;
+        }
+
+        .district-stats {
+            width: 100%;
+            background: var(--background-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .pie-chart-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-wrapper {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .district-map-container {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .biography {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .biography h2 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .biography p {
+            line-height: 1.6;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .portrait-container {
+            width: 400px;
+            height: 500px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 3px solid var(--primary-blue);
+        }
+
+        .portrait-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .error-message h2 {
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-blue);
+        }
+
+        .charts-section {
+            margin-top: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .chart-wrapper {
+            padding: 1rem;
+            border-radius: 8px;
+            background: var(--background-light);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .editor-toolbar {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .editor-toolbar button {
+            padding: 0.25rem 0.5rem;
+            margin-right: 0.5rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .editor-toolbar button:hover {
+            background: #f0f0f0;
+        }
+
+        #biographyEditor {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .claim-district-btn {
+            display: inline-block;
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            cursor: pointer;
+            border: none;
+        }
+
+        .claim-district-btn:hover {
+            background-color: var(--secondary-blue);
+        }
+
+        .claim-district-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 5% auto; /* Reduced from 15% to 5% to give more vertical space */
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px; /* Increased from 500px to accommodate editor better */
+            max-height: 90vh; /* Maximum height of 90% of viewport height */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* Enable scrolling for entire modal if needed */
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-error {
+            color: #dc3545;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .message {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            color: white;
+            z-index: 1001;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .message.success {
+            background-color: #28a745;
+        }
+
+        .message.error {
+            background-color: #dc3545;
+        }
+
+        .message.info {
+            background-color: #17a2b8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .welcome-text {
+            color: white;
+            font-weight: 600;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-login {
+            background-color: var(--accent-gold);
+            color: white;
+        }
+
+        .btn-register {
+            background-color: transparent;
+            border: 2px solid var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 5% auto; /* Reduced from 15% to 5% to give more vertical space */
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px; /* Increased from 500px to accommodate editor better */
+            max-height: 90vh; /* Maximum height of 90% of viewport height */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* Enable scrolling for entire modal if needed */
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .message {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            color: white;
+            font-weight: 600;
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .message.success {
+            background-color: #28a745;
+        }
+
+        .message.error {
+            background-color: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Biography editor styles */
+        .formatting-toolbar {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .formatting-toolbar button {
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .formatting-toolbar button:hover {
+            background-color: #f0f0f0;
+        }
+
+        #biographyEditor {
+            width: 100%;
+            max-height: 400px; /* Set maximum height */
+            min-height: 200px;
+            padding: 1rem;
+            border: 2px solid var(--primary-blue); /* Defined frame */
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-family: inherit;
+            line-height: 1.6;
+            background: white;
+            overflow-y: auto; /* Enable vertical scrolling */
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1); /* Inner shadow for depth */
+        }
+
+        /* Custom scrollbar styling */
+        .biography-editor::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .biography-editor::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .biography-editor::-webkit-scrollbar-thumb {
+            background: var(--secondary-blue);
+            border-radius: 4px;
+        }
+
+        .biography-editor::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-blue);
+        }
+
+        .biography-container {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .biography-content {
+            position: relative;
+            max-height: 150px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 10px; /* Add padding for scrollbar */
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--secondary-blue) #f0f0f0; /* Firefox */
+        }
+
+        /* Webkit scrollbar styling (Chrome, Safari, Edge) */
+        .biography-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .biography-content::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .biography-content::-webkit-scrollbar-thumb {
+            background: var(--secondary-blue);
+            border-radius: 4px;
+        }
+
+        .biography-content::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-blue);
+        }
+
+        .edit-biography-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .edit-biography-btn {
+            background-color: var(--accent-gold);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <a href="/" style="color: white; text-decoration: none; font-size: 1.5rem; font-weight: 700;">VCHouse.gov</a>
+        </div>
+        <div class="user-menu">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </header>
+
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="VCHouse2.html">Home</a></li>
+            <li><a href="leadership.html">Leadership</a></li>
+            <li><a href="legislation.html">Legislation</a></li>
+            <li><a href="documents.html">Documents</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+
+    <div class="district-page">
+        <a href="VCHouse2.html" class="back-button">← Back to Map</a>
+        <div class="main-content">
+            <div class="left-column">
+                <div class="representative-info">
+                    <h1 id="representativeName"></h1>
+                    <span id="partyBadge" class="party-badge"></span>
+                    <div id="districtStats" class="district-stats"></div>
+                </div>
+                <div class="biography">
+                    <h2>Biography</h2>
+                    <div class="biography-container">
+                        <div class="biography-content" id="biographyContent">
+                            <p id="biographyText"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="district-map-container" id="districtMap"></div>
+            </div>
+            <div class="right-column">
+                <div class="portrait-container">
+                    <img id="representativePortrait" src="" alt="Representative Portrait">
+                </div>
+                <div class="charts-section">
+                    <div class="charts-grid">
+                        <div class="chart-wrapper">
+                            <div class="chart-title">Demographic Breakdown</div>
+                            <canvas id="demographicChart"></canvas>
+                        </div>
+                        <div class="chart-wrapper">
+                            <div class="chart-title">Voting History</div>
+                            <canvas id="votingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Login to VCHouse.gov</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div id="loginError" class="form-error"></div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Create an Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerFullName">Full Name</label>
+                    <input type="text" id="registerFullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerParty">Party</label>
+                    <select id="registerParty" required>
+                        <option value="">Select a party</option>
+                        <option value="Democrat">Democrat</option>
+                        <option value="Republican">Republican</option>
+                        <option value="Independent">Independent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="registerPortrait">Portrait</label>
+                    <input type="file" id="registerPortrait" accept="image/*" required>
+                </div>
+                
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Biography Editor Modal -->
+    <div id="biographyModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('biographyModal')">&times;</span>
+            <h2>Edit Biography</h2>
+            <form id="biographyForm">
+                <div class="editor-toolbar">
+                    <button type="button" onclick="formatText('bold')" title="Bold"><b>B</b></button>
+                    <button type="button" onclick="formatText('italic')" title="Italic"><i>I</i></button>
+                    <button type="button" onclick="formatText('underline')" title="Underline"><u>U</u></button>
+                </div>
+                <div id="biographyEditor" contenteditable="true" class="biography-editor"></div>
+                <div id="biographyError" class="error-message"></div>
+                <button type="submit" class="btn">Save Biography</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="district.js"></script>
+    <script>
+    function formatText(command) {
+        const editor = document.getElementById('biographyEditor');
+        if (!editor) return;
+
+        // Save current selection
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+        
+        // Apply formatting
+        document.execCommand(command, false, null);
+        
+        // Restore focus
+        editor.focus();
+        
+        // Restore selection
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    // Handle biography form submission
+    document.getElementById('biographyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const biography = document.getElementById('biographyEditor').innerHTML;
+        
+        try {
+            const response = await fetch('/api/update-biography', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ biography }),
+                credentials: 'include'
+            });
+            
+            const data = await response.json();
+            if (response.ok) {
+                closeModal('biographyModal');
+                location.reload();
+            } else {
+                document.getElementById('biographyError').textContent = data.message || 'Failed to update biography';
+            }
+        } catch (error) {
+            console.error('Error updating biography:', error);
+            document.getElementById('biographyError').textContent = 'Failed to update biography. Please try again.';
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legislative Tracker - VCHouse.gov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #005DA6;
+            --accent-gold: #B5985A;
+            --text-dark: #333333;
+            --background-light: #F5F5F5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            background-color: var(--secondary-blue);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-blue);
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .bill-list {
+            list-style: none;
+        }
+
+        .bill-item {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .bill-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .bill-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-introduced { background-color: #e9ecef; }
+        .status-committee { background-color: #fff3cd; }
+        .status-passed-house { background-color: #d4edda; }
+        .status-failed { background-color: #f8d7da; }
+
+        .bill-meta {
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .bill-description {
+            margin-bottom: 0.5rem;
+        }
+
+        .bill-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .committee-schedule {
+            margin-top: 2rem;
+        }
+
+        .schedule-item {
+            padding: 1rem;
+            border-left: 4px solid var(--accent-gold);
+            background: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+
+        .schedule-time {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: #eee;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: var(--secondary-blue);
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .page-btn.active {
+            background: var(--secondary-blue);
+            color: white;
+            border-color: var(--secondary-blue);
+        }
+
+        .coming-soon-container {
+            position: relative;
+            min-height: 80vh;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .coming-soon-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 100;
+        }
+
+        .coming-soon-text {
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            transform: rotate(-30deg);
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+            background: rgba(0, 51, 102, 0.9);
+            color: white;
+            padding: 2rem 4rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .blurred-content {
+            filter: blur(4px);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Legislative Tracker</h1>
+        <nav>
+            <a href="VCHouse2.html" class="btn">Back to Home</a>
+        </nav>
+    </header>
+
+    <div class="container coming-soon-container">
+        <div class="coming-soon-overlay">
+            <div class="coming-soon-text">COMING SOON</div>
+        </div>
+        <aside class="sidebar blurred-content">
+            <div class="filter-section">
+                <h3>Search</h3>
+                <input type="text" class="search-box" placeholder="Search bills...">
+            </div>
+
+            <div class="filter-section">
+                <h3>Filter by Status</h3>
+                <div class="filter-group">
+                    <label><input type="checkbox" checked> Introduced</label>
+                    <label><input type="checkbox" checked> In Committee</label>
+                    <label><input type="checkbox" checked> Passed House</label>
+                    <label><input type="checkbox" checked> Failed</label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Filter by Committee</h3>
+                <div class="filter-group">
+                    <label><input type="checkbox" checked> Ways and Means</label>
+                    <label><input type="checkbox" checked> Judiciary</label>
+                    <label><input type="checkbox" checked> Armed Services</label>
+                    <label><input type="checkbox" checked> Foreign Affairs</label>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content blurred-content">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('bills')">Bills</button>
+                <button class="tab" onclick="showTab('committees')">Committee Schedule</button>
+                <button class="tab" onclick="showTab('floor')">Floor Schedule</button>
+            </div>
+
+            <div id="bills" class="tab-content">
+                <ul class="bill-list">
+                    <li class="bill-item">
+                        <div class="bill-header">
+                            <span class="bill-title">H.R. 1234 - Virtual Infrastructure Act</span>
+                            <span class="bill-status status-committee">In Committee</span>
+                        </div>
+                        <div class="bill-meta">
+                            Introduced by Rep. John Smith (D-CA-1) • Ways and Means Committee
+                        </div>
+                        <div class="bill-description">
+                            A bill to modernize and improve virtual infrastructure across the nation.
+                        </div>
+                        <div class="bill-actions">
+                            <a href="#" class="btn">View Details</a>
+                            <a href="#" class="btn">Track Bill</a>
+                        </div>
+                    </li>
+                    <!-- More bill items -->
+                </ul>
+
+                <div class="pagination">
+                    <button class="page-btn">1</button>
+                    <button class="page-btn active">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">Next</button>
+                </div>
+            </div>
+
+            <div id="committees" class="tab-content" style="display: none;">
+                <div class="committee-schedule">
+                    <div class="schedule-item">
+                        <div class="schedule-time">10:00 AM - Ways and Means Committee</div>
+                        <p>Hearing on Virtual Infrastructure Act (H.R. 1234)</p>
+                        <p>Location: Virtual Committee Room 1</p>
+                    </div>
+                    <!-- More schedule items -->
+                </div>
+            </div>
+
+            <div id="floor" class="tab-content" style="display: none;">
+                <div class="committee-schedule">
+                    <div class="schedule-item">
+                        <div class="schedule-time">2:00 PM - House Floor Session</div>
+                        <p>Voting on Virtual Education Enhancement Act (H.R. 1235)</p>
+                    </div>
+                    <!-- More floor schedule items -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabId).style.display = 'block';
+            
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Search functionality
+        const searchBox = document.querySelector('.search-box');
+        searchBox.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const bills = document.querySelectorAll('.bill-item');
+            
+            bills.forEach(bill => {
+                const title = bill.querySelector('.bill-title').textContent.toLowerCase();
+                const description = bill.querySelector('.bill-description').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    bill.style.display = 'block';
+                } else {
+                    bill.style.display = 'none';
+                }
+            });
+        });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-group input').forEach(checkbox => {
+            checkbox.addEventListener('change', updateFilters);
+        });
+
+        function updateFilters() {
+            const bills = document.querySelectorAll('.bill-item');
+            const selectedStatuses = Array.from(document.querySelectorAll('.filter-group:first-of-type input:checked'))
+                .map(cb => cb.parentElement.textContent.trim().toLowerCase());
+            
+            bills.forEach(bill => {
+                const status = bill.querySelector('.bill-status').textContent.toLowerCase();
+                bill.style.display = selectedStatuses.some(s => status.includes(s)) ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

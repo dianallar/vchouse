@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Important Documents - VCHouse.gov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #005DA6;
+            --accent-gold: #B5985A;
+            --text-dark: #333333;
+            --background-light: #F5F5F5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-menu {
+            background-color: var(--secondary-blue);
+            padding: 0.5rem 2rem;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .document-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .document-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .document-header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem;
+        }
+
+        .document-content {
+            padding: 2rem;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .document-content h2 {
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+        }
+
+        .document-content h3 {
+            color: var(--secondary-blue);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .document-content p {
+            margin-bottom: 1rem;
+        }
+
+        .document-content ul, .document-content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .document-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .document-frame {
+            width: 100%;
+            height: 600px;
+            border: none;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            background-color: var(--secondary-blue);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-blue);
+        }
+
+        .document-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: #eee;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: var(--secondary-blue);
+            color: white;
+        }
+
+        .document-viewer {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .document-description {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .coming-soon-overlay {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .coming-soon-overlay::after {
+            content: 'COMING SOON';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            background: rgba(0, 51, 102, 0.9);
+            color: white;
+            padding: 2rem 4rem;
+            font-size: 3rem;
+            font-weight: bold;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .coming-soon-overlay iframe {
+            filter: blur(4px);
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Important Documents</h1>
+        <nav>
+            <a href="VCHouse2.html" class="btn">Back to Home</a>
+        </nav>
+    </header>
+
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="#constitution">Constitution</a></li>
+            <li><a href="#house-rules">House Rules</a></li>
+            <li><a href="#budget">Budget</a></li>
+            <li><a href="#legislation">Current Legislation</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="document-tabs">
+            <button class="tab active" onclick="showDocument('constitution')">Constitution</button>
+            <button class="tab" onclick="showDocument('house-rules')">House Rules</button>
+            <button class="tab" onclick="showDocument('budget')">Budget</button>
+            <button class="tab" onclick="showDocument('legislation')">Current Legislation</button>
+        </div>
+
+        <div class="document-viewer">
+            <div id="constitution" class="document-section">
+                <div class="document-description">
+                    <h2>Virtual Congress Constitution</h2>
+                    <p>The foundational document establishing the structure and rules of our virtual Congress.</p>
+                </div>
+                <iframe
+                    src="Documents/constitution.pdf"
+                    class="document-frame"
+                    id="constitution-pdf">
+                    <p>It appears you don't have a PDF plugin for this browser.
+                    You can <a href="Documents/constitution.pdf">click here to download the PDF file.</a></p>
+                </iframe>
+            </div>
+
+            <div id="house-rules" class="document-section" style="display: none;">
+                <div class="document-description">
+                    <h2>House Rules</h2>
+                    <p>Current rules and procedures governing the operations of the House of Representatives.</p>
+                </div>
+                <iframe
+                    src="Documents/house-rules.pdf"
+                    class="document-frame"
+                    id="house-rules-pdf">
+                    <p>It appears you don't have a PDF plugin for this browser.
+                    You can <a href="Documents/house-rules.pdf">click here to download the PDF file.</a></p>
+                </iframe>
+            </div>
+
+            <div id="budget" class="document-section" style="display: none;">
+                <div class="document-description">
+                    <h2>Current Budget</h2>
+                    <p>Detailed breakdown of the current fiscal year's budget and appropriations.</p>
+                </div>
+                <div class="coming-soon-overlay">
+                    <iframe
+                        src="Documents/budget.pdf"
+                        class="document-frame"
+                        id="budget-pdf">
+                        <p>It appears you don't have a PDF plugin for this browser.
+                        You can <a href="Documents/budget.pdf">click here to download the PDF file.</a></p>
+                    </iframe>
+                </div>
+            </div>
+
+            <div id="legislation" class="document-section" style="display: none;">
+                <div class="document-description">
+                    <h2>Current Legislation</h2>
+                    <p>Track and review current legislative proposals and their status.</p>
+                </div>
+                <div class="coming-soon-overlay">
+                    <iframe
+                        src="Documents/legislation.pdf"
+                        class="document-frame"
+                        id="legislation-pdf">
+                        <p>It appears you don't have a PDF plugin for this browser.
+                        You can <a href="Documents/legislation.pdf">click here to download the PDF file.</a></p>
+                    </iframe>
+                </div>
+            </div>
+
+            <div id="coming-soon" class="document-section" style="display: none;">
+                <div class="document-description coming-soon-overlay">
+                    <h2>New Document</h2>
+                    <p>This document section is coming soon. Stay tuned for updates!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDocument(docId, clickEvent) {
+            // Hide all document sections
+            document.querySelectorAll('.document-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected document section
+            document.getElementById(docId).style.display = 'block';
+            
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // If this was triggered by a click event, update the clicked tab
+            if (clickEvent && clickEvent.target) {
+                clickEvent.target.classList.add('active');
+            } else {
+                // If triggered by URL hash, find and update the corresponding tab
+                document.querySelector(`[onclick="showDocument('${docId}')"]`)?.classList.add('active');
+            }
+        }
+
+        // Handle hash navigation
+        function handleHash() {
+            const hash = window.location.hash.slice(1) || 'constitution';
+            showDocument(hash);
+        }
+
+        window.addEventListener('hashchange', handleHash);
+        window.addEventListener('load', handleHash);
+
+        // Update onclick handlers in HTML to pass event
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                const docId = tab.getAttribute('onclick').match(/'([^']+)'/)[1];
+                tab.onclick = function(e) {
+                    showDocument(docId, e);
+                };
+            });
+        });
+    </script>
+</body>
+</html>

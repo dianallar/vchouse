@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderate Districts - VCHouse.gov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #005DA6;
+            --accent-gold: #B5985A;
+            --text-dark: #333333;
+            --background-light: #F5F5F5;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-bar {
+            margin-bottom: 2rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+        }
+
+        .districts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .district-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .district-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .district-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .district-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .district-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-claimed {
+            background-color: #e6f3ff;
+            color: #0015BC;
+        }
+
+        .status-vacant {
+            background-color: #ffe6e6;
+            color: #FF0000;
+        }
+
+        .district-info {
+            margin-bottom: 1rem;
+        }
+
+        .district-info p {
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .district-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-blue);
+        }
+
+        .btn-danger {
+            background-color: var(--error-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .message.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-green);
+        }
+
+        .message.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--error-red);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Moderate Districts</h1>
+        <nav>
+            <a href="profile.html" class="btn btn-primary">Back to Profile</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search districts...">
+            </div>
+
+            <div id="messageContainer"></div>
+
+            <div class="districts-grid" id="districtsGrid">
+                <!-- Districts will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit District Modal -->
+    <div id="editDistrictModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('editDistrictModal')">&times;</span>
+            <h2>Edit District</h2>
+            <form id="editDistrictForm">
+                <input type="hidden" id="editDistrictKey">
+                <div class="form-group">
+                    <label for="editRepresentative">Representative</label>
+                    <input type="text" id="editRepresentative" required>
+                </div>
+                <div class="form-group">
+                    <label for="editParty">Party</label>
+                    <select id="editParty" required>
+                        <option value="Democrat">Democrat</option>
+                        <option value="Republican">Republican</option>
+                        <option value="Independent">Independent</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let districts = {};
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadDistricts();
+            setupSearch();
+            setupEditForm();
+        });
+
+        async function loadDistricts() {
+            try {
+                const response = await fetch('/api/admin/districts', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    districts = data.districts;
+                    displayDistricts(districts);
+                } else {
+                    showMessage(data.message || 'Error loading districts', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading districts:', error);
+                showMessage('Error loading districts', 'error');
+            }
+        }
+
+        function displayDistricts(districtsToShow) {
+            const grid = document.getElementById('districtsGrid');
+            grid.innerHTML = '';
+
+            Object.entries(districtsToShow).forEach(([key, value]) => {
+                const [name, party] = value ? value.split(' (') : ['Vacant', ''];
+                const partyClean = party ? party.replace(')', '') : '';
+
+                const card = document.createElement('div');
+                card.className = 'district-card';
+                card.innerHTML = `
+                    <div class="district-header">
+                        <span class="district-name">${key}</span>
+                        <span class="district-status ${value ? 'status-claimed' : 'status-vacant'}">
+                            ${value ? 'Claimed' : 'Vacant'}
+                        </span>
+                    </div>
+                    <div class="district-info">
+                        <p><strong>Representative:</strong> ${name}</p>
+                        <p><strong>Party:</strong> ${partyClean}</p>
+                    </div>
+                    <div class="district-actions">
+                        <button class="btn btn-primary" onclick="editDistrict('${key}', '${name}', '${partyClean}')">
+                            Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="clearDistrict('${key}')">
+                            Clear
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredDistricts = Object.entries(districts).reduce((acc, [key, value]) => {
+                    if (key.toLowerCase().includes(searchTerm) || 
+                        value.toLowerCase().includes(searchTerm)) {
+                        acc[key] = value;
+                    }
+                    return acc;
+                }, {});
+                displayDistricts(filteredDistricts);
+            });
+        }
+
+        function setupEditForm() {
+            const form = document.getElementById('editDistrictForm');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const districtKey = document.getElementById('editDistrictKey').value;
+                const representative = document.getElementById('editRepresentative').value;
+                const party = document.getElementById('editParty').value;
+                
+                try {
+                    const response = await fetch('/api/admin/update-district', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            districtKey,
+                            representative: `${representative} (${party})`
+                        }),
+                        credentials: 'include'
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        showMessage('District updated successfully', 'success');
+                        closeModal('editDistrictModal');
+                        await loadDistricts();
+                    } else {
+                        showMessage(data.message || 'Error updating district', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error updating district:', error);
+                    showMessage('Error updating district', 'error');
+                }
+            });
+        }
+
+        function editDistrict(key, name, party) {
+            document.getElementById('editDistrictKey').value = key;
+            document.getElementById('editRepresentative').value = name;
+            document.getElementById('editParty').value = party;
+            openModal('editDistrictModal');
+        }
+
+        async function clearDistrict(key) {
+            if (!confirm('Are you sure you want to clear this district?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/update-district', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        districtKey: key,
+                        representative: 'N/A'
+                    }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage('District cleared successfully', 'success');
+                    await loadDistricts();
+                } else {
+                    showMessage(data.message || 'Error clearing district', 'error');
+                }
+            } catch (error) {
+                console.error('Error clearing district:', error);
+                showMessage('Error clearing district', 'error');
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            container.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html> 

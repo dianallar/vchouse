@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - VCHouse.gov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #005DA6;
+            --accent-gold: #B5985A;
+            --text-dark: #333333;
+            --background-light: #F5F5F5;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .profile-sidebar {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .profile-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .profile-picture {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+            border: 4px solid var(--primary-blue);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-picture:hover {
+            transform: scale(1.02);
+        }
+
+        .profile-picture-container {
+            position: relative;
+            width: 200px;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-radius: 0 0 50% 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-overlay:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+        }
+
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .btn {
+            background-color: var(--secondary-blue);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-blue);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .error-message {
+            color: var(--error-red);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .success-message {
+            color: var(--success-green);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            margin-top: 1rem;
+            display: none;
+            border-radius: 8px;
+        }
+
+        .claimed-district {
+            background-color: #e9ecef;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .claimed-district h3 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-controls {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #eee;
+        }
+
+        .admin-controls h2 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .admin-btn {
+            background-color: var(--accent-gold);
+            margin-right: 0.5rem;
+        }
+
+        .admin-btn:hover {
+            background-color: #9a8250;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>My Profile</h1>
+        <nav>
+            <a href="VCHouse2.html" class="btn">Back to Map</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <aside class="profile-sidebar">
+            <div class="profile-picture-container">
+                <img src="Portraits/default.svg" alt="Portrait" class="profile-picture" id="currentPortrait">
+                <div class="upload-overlay" onclick="document.getElementById('portraitInput').click()">
+                    Edit Portrait
+                </div>
+                <input type="file" id="portraitInput" hidden accept="image/*">
+            </div>
+            <div id="imagePreviewContainer">
+                <img id="imagePreview" alt="Preview">
+            </div>
+            <div id="uploadError" class="error-message"></div>
+            <div id="uploadSuccess" class="success-message"></div>
+            
+            <div class="claimed-district">
+                <h3>Claimed District</h3>
+                <p id="claimedDistrict">None</p>
+            </div>
+        </aside>
+
+        <main class="profile-content">
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="fullName">Display Name</label>
+                    <input type="text" id="fullName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="biography">Biography</label>
+                    <textarea id="biography" placeholder="Tell us about yourself..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location">
+                </div>
+
+                <div class="form-group">
+                    <label for="website">Website</label>
+                    <input type="url" id="website" placeholder="https://...">
+                </div>
+
+                <button type="submit" class="btn">Save Changes</button>
+            </form>
+
+            <div id="adminControls" class="admin-controls" style="display: none;">
+                <h2>Admin Controls</h2>
+                <button class="btn admin-btn" onclick="moderateDistricts()">Moderate Districts</button>
+                <button class="btn admin-btn" onclick="manageUsers()">Manage Users</button>
+                <button class="btn admin-btn" onclick="viewReports()">View Reports</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html>
