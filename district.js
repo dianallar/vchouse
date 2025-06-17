@@ -176,7 +176,7 @@ async function loadDistrictData(state, district) {
             updateRepresentativeInfo({ Name: name, Party: partyClean }, districtKey, state, district);
             
             // Fetch biography without auth requirement
-            fetch(`/api/biography/${districtKey}`)
+            fetch(`${API_BASE}/api/biography/${districtKey}`)
                 .then(response => response.json())
                 .then(data => {
                     const biographyText = document.getElementById('biographyText');
