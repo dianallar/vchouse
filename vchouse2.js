@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allDistricts = [];
     let representativesData = {};
     const districtLayers = new Map();
-    const API_URL = 'http://localhost:3000/api';
+    const API_URL = 'https://vchouse-production.up.railway.app/api';
 
     // Load representatives data
     fetch('representatives_new.json')
