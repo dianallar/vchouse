@@ -1,5 +1,6 @@
 // Global variables
 let currentUser = null;
+const API_BASE = 'https://vchouse-production.up.railway.app';
 
 // Modal functions
 function openModal(modalId) {
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Check if user is logged in
     try {
         console.log('Checking auth status...');
-        const response = await fetch('/api/auth-status', {
+        const response = await fetch(`${API_BASE}/api/auth-status`, {
             credentials: 'include'
         });
         const data = await response.json();
@@ -76,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             try {
                 console.log('Sending login request to /api/login');
-                const response = await fetch('/api/login', {
+                const response = await fetch(`${API_BASE}/api/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -257,7 +258,7 @@ function updateRepresentativeInfo(districtData, districtKey, state, district) {
         }
 
         // Fetch and display biography
-        fetch('/api/get-biography', {
+        fetch(`${API_BASE}/api/get-biography`, {
             credentials: 'include',
             headers: { 'Accept': 'application/json' }
         })
@@ -299,7 +300,7 @@ function updateRepresentativeInfo(districtData, districtKey, state, district) {
 function openBiographyEditor() {
     const editor = document.getElementById('biographyEditor');
     // Get current biography
-    fetch('/api/get-biography', {
+    fetch(`${API_BASE}/api/get-biography`, {
         credentials: 'include'
     })
     .then(response => response.json())
@@ -321,7 +322,7 @@ document.getElementById('biographyForm').addEventListener('submit', async (e) =>
     const biography = editor.innerText; // Use innerText instead of innerHTML to get plain text
     
     try {
-        const response = await fetch('/api/update-biography', {
+        const response = await fetch(`${API_BASE}/api/update-biography`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -372,7 +373,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 
     console.log('Sending registration request...');
     try {
-        const response = await fetch('http://localhost:3000/api/register', {
+        const response = await fetch(`${API_BASE}/api/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -584,7 +585,7 @@ async function handleClaimDistrict(state, district) {
     }
 
     try {
-        const response = await fetch('/api/claim-district', {
+        const response = await fetch(`${API_BASE}/api/claim-district`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -665,7 +666,7 @@ function updateUIForUser() {
 async function logout() {
     try {
         console.log('Attempting to logout');
-        const response = await fetch('/api/logout', {
+        const response = await fetch(`${API_BASE}/api/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -711,7 +712,7 @@ function updateShowMoreButton() {
 // Update your biography fetch handler
 async function fetchBiography(user) {
     try {
-        const response = await fetch('/api/biography');
+        const response = await fetch(`${API_BASE}/api/biography`);
         console.log('Biography response status:', response.status);
         
         if (response.ok) {
@@ -812,7 +813,7 @@ async function claimDistrict() {
     const district = urlParams.get('district');
 
     try {
-        const response = await fetch('/api/claim-district', {
+        const response = await fetch(`${API_BASE}/api/claim-district`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -890,7 +891,7 @@ async function unclaimDistrict() {
         const state = urlParams.get('state');
         const district = urlParams.get('district');
 
-        const response = await fetch('http://localhost:3000/api/unclaim-district', {
+        const response = await fetch(`${API_BASE}/api/unclaim-district`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
