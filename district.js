@@ -925,7 +925,7 @@ async function loadBiographyFromAPI() {
         const district = urlParams.get('district');
         const districtKey = `${state}-${district}`;
 
-        const response = await fetch(`http://localhost:3000/api/get-district-biography/${districtKey}`, {
+        const response = await fetch(`${API_BASE}/api/get-district-biography/${districtKey}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
