@@ -188,11 +188,13 @@ async function loadDistrictData(state, district) {
                 });
                 
             loadDistrictStats(state, district);
+            updateClaimButton(false);
         } else {
             document.getElementById('representativeName').textContent = 'No Representative Assigned';
             document.getElementById('partyBadge').style.display = 'none';
             document.getElementById('biographyContent').innerHTML = '<p>No representative information available for this district.</p>';
             loadDistrictStats(state, district);
+            updateClaimButton(true);
         }
     } catch (error) {
         console.error('Error loading district data:', error);
@@ -345,39 +347,54 @@ document.getElementById('biographyForm').addEventListener('submit', async (e) =>
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     console.log('Registration form submitted');
-    
-    const formData = new FormData();
-    formData.append('fullName', document.getElementById('registerFullName').value);
-    formData.append('email', document.getElementById('registerEmail').value);
-    formData.append('password', document.getElementById('registerPassword').value);
-    formData.append('party', document.getElementById('registerParty').value);
-    
-    const portraitFile = document.getElementById('registerPortrait').files[0];
-    if (portraitFile) {
-        formData.append('portrait', portraitFile);
+
+    const errorDiv = document.getElementById('registerError');
+    const formData = new FormData(e.target);
+
+    const registrationData = {
+        fullName: formData.get('fullName'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        party: formData.get('party')
+    };
+
+    // Validate form data
+    if (!registrationData.fullName || !registrationData.email || !registrationData.password || !registrationData.party) {
+        errorDiv.textContent = 'All fields are required';
+        return;
     }
 
+    // Password confirmation check
+    if (formData.get('password') !== formData.get('confirmPassword')) {
+        errorDiv.textContent = 'Passwords do not match';
+        return;
+    }
+
+    console.log('Sending registration request...');
     try {
-        console.log('Sending registration request...');
-        const response = await fetch('/api/register', {
+        const response = await fetch('http://localhost:3000/api/register', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(registrationData),
+            credentials: 'include'
         });
 
-        const data = await response.json();
-        console.log('Registration response:', data);
-
-        if (response.ok) {
-            closeModal('registerModal');
-            showMessage('Registration successful! Please log in.', 'success');
-            // Reset form
-            document.getElementById('registerForm').reset();
-        } else {
-            showMessage(data.message || 'Registration failed', 'error');
+        if (!response.ok) {
+            const data = await response.json();
+            errorDiv.textContent = data.message || 'Registration failed';
+            return;
         }
+
+        const data = await response.json();
+        console.log('Registration successful:', data);
+        closeModal('registerModal');
+        showMessage('Registration successful! Please log in.');
+        e.target.reset();
     } catch (error) {
         console.error('Registration error:', error);
-        showMessage('Registration failed', 'error');
+        errorDiv.textContent = 'Error connecting to server. Please try again.';
     }
 });
 
@@ -769,3 +786,171 @@ function updateBiographyDisplay() {
         fadeBottom.style.display = 'none';
     }
 }
+
+// Add after initial district data loading
+function updateClaimButton(isVacant) {
+    const container = document.getElementById('claimDistrictContainer');
+    if (isVacant) {
+        container.innerHTML = `
+            <button class="claim-district-btn" onclick="claimDistrict()">
+                Claim This District
+            </button>
+        `;
+    } else {
+        container.innerHTML = '';
+    }
+}
+
+async function claimDistrict() {
+    if (!currentUser) {
+        openModal('loginModal');
+        return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const state = urlParams.get('state');
+    const district = urlParams.get('district');
+
+    try {
+        const response = await fetch('/api/claim-district', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ state, district }),
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showMessage('District claimed successfully!', 'success');
+            // Reload the page to show updated information
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showMessage(data.message || 'Failed to claim district', 'error');
+        }
+    } catch (error) {
+        console.error('Error claiming district:', error);
+        showMessage('Error claiming district', 'error');
+    }
+}
+
+// Update loadDistrictData to include claim button logic
+async function loadDistrictData(state, district) {
+    try {
+        const response = await fetch('representatives_new.json');
+        const data = await response.json();
+        
+        const districtKey = `${state}-${district}`;
+        const representativeInfo = data[districtKey];
+        
+        if (representativeInfo && representativeInfo !== "N/A") {
+            const [name, party] = representativeInfo.split(' (');
+            const partyClean = party.replace(')', '');
+            
+            // Update representative info without auth check
+            updateRepresentativeInfo({ Name: name, Party: partyClean }, districtKey, state, district);
+            
+            // Fetch biography without auth requirement
+            fetch(`/api/biography/${districtKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    const biographyText = document.getElementById('biographyText');
+                    biographyText.innerHTML = data.biography || 'No biography available.';
+                    updateShowMoreButton();
+                })
+                .catch(error => {
+                    console.error('Error loading biography:', error);
+                    document.getElementById('biographyText').innerHTML = 'No biography available.';
+                });
+                
+            loadDistrictStats(state, district);
+            updateClaimButton(false);
+        } else {
+            document.getElementById('representativeName').textContent = 'No Representative Assigned';
+            document.getElementById('partyBadge').style.display = 'none';
+            document.getElementById('biographyContent').innerHTML = '<p>No representative information available for this district.</p>';
+            loadDistrictStats(state, district);
+            updateClaimButton(true);
+        }
+    } catch (error) {
+        console.error('Error loading district data:', error);
+    }
+}
+
+async function unclaimDistrict() {
+    if (!confirm('Are you sure you want to unclaim this district? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        // Get current district info from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const state = urlParams.get('state');
+        const district = urlParams.get('district');
+
+        const response = await fetch('http://localhost:3000/api/unclaim-district', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ state, district }),
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.message || 'Failed to unclaim district');
+        }
+
+        const data = await response.json();
+        showMessage('District unclaimed successfully');
+        
+        // Redirect to main page after short delay
+        setTimeout(() => {
+            window.location.href = 'VCHouse2.html';
+        }, 1500);
+    } catch (error) {
+        console.error('Error unclaiming district:', error);
+        showMessage('Error unclaiming district: ' + error.message, 'error');
+    }
+}
+
+async function loadBiographyFromAPI() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const state = urlParams.get('state');
+        const district = urlParams.get('district');
+        const districtKey = `${state}-${district}`;
+
+        const response = await fetch(`http://localhost:3000/api/get-district-biography/${districtKey}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const biographyText = document.getElementById('biographyText');
+        if (biographyText) {
+            biographyText.innerHTML = data.biography || 'No biography available.';
+        }
+    } catch (error) {
+        console.error('Error loading biography:', error);
+        const biographyText = document.getElementById('biographyText');
+        if (biographyText) {
+            biographyText.textContent = 'Error loading biography.';
+        }
+    }
+}
+
+// Call this function after DOMContentLoaded or wherever appropriate
+document.addEventListener('DOMContentLoaded', () => {
+    loadBiographyFromAPI();
+});

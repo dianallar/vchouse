@@ -68,75 +68,55 @@ function populateProfileForm(user) {
     loadClaimedDistrict();
 }
 
+// Fix the profile picture upload handler
 async function handleProfilePictureUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.match('image.*')) {
-        showMessage('Please select an image file', 'error');
-        return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        showMessage('Image size should be less than 5MB', 'error');
-        return;
-    }
-
-    // Show preview
-    const preview = document.getElementById('imagePreview');
-    preview.src = URL.createObjectURL(file);
-    preview.style.display = 'block';
-
-    // Determine filename based on claimed district or username
-    let filename;
     try {
-        const districtResponse = await fetch('/api/claimed-district', {
-            credentials: 'include'
-        });
-        const districtData = await districtResponse.json();
-        
-        if (districtResponse.ok && districtData.district) {
-            // Use district key composite
-            filename = `${districtData.district.replace(/\s+/g, '')}.jpg`;
-        } else {
-            // Use username with underscores
-            filename = `${currentUser.username.replace(/\s+/g, '_')}.jpg`;
+        const file = event.target.files[0];
+        if (!file) {
+            showMessage('No file selected', 'error');
+            return;
         }
-    } catch (error) {
-        console.error('Error determining filename:', error);
-        showMessage('Error uploading portrait', 'error');
-        return;
-    }
 
-    // Upload image
-    const formData = new FormData();
-    formData.append('portrait', file);
-    formData.append('filename', filename);
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            showMessage('Please upload an image file', 'error');
+            return;
+        }
 
-    try {
+        // Get claimed district from the page
+        const districtKey = document.getElementById('claimedDistrict')?.textContent?.trim();
+        if (!districtKey || districtKey === 'None') {
+            showMessage('No claimed district found', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('portrait', file);
+        formData.append('districtKey', districtKey);
+
         const response = await fetch('/api/update-portrait', {
             method: 'POST',
-            body: formData,
-            credentials: 'include'
+            credentials: 'include',
+            body: formData
         });
 
-        const data = await response.json();
-        if (response.ok) {
-            showMessage('Portrait updated successfully', 'success');
-            document.getElementById('currentPortrait').src = `Portraits/${filename}`;
-            
-            // Update district page biography if district is claimed
-            if (data.district) {
-                await updateDistrictBiography(document.getElementById('biography').value);
-            }
-        } else {
-            showMessage(data.message || 'Failed to update portrait', 'error');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to upload portrait');
         }
+
+        const data = await response.json();
+
+        // Update the portrait display
+        const portraitImg = document.getElementById('currentPortrait');
+        if (portraitImg && data.filename) {
+            portraitImg.src = `Portraits/${data.filename}?t=${Date.now()}`;
+        }
+
+        showMessage('Portrait updated successfully', 'success');
     } catch (error) {
         console.error('Error uploading portrait:', error);
-        showMessage('Error uploading portrait', 'error');
+        showMessage(error.message || 'Failed to upload portrait', 'error');
     }
 }
 
@@ -220,27 +200,20 @@ async function handleProfileSubmit(event) {
 
 async function loadClaimedDistrict() {
     try {
-        const response = await fetch('/api/claimed-district', {
-            credentials: 'include'
-        });
+        const response = await fetch('/api/claimed-district', { credentials: 'include' });
         const data = await response.json();
-        
-        if (response.ok && data.district) {
-            const districtElement = document.getElementById('claimedDistrict');
-            if (districtElement) {
+        const districtElement = document.getElementById('claimedDistrict');
+        if (districtElement) {
+            if (data.district) {
                 districtElement.textContent = data.district;
-            }
-        } else {
-            const districtElement = document.getElementById('claimedDistrict');
-            if (districtElement) {
+            } else {
                 districtElement.textContent = 'None';
             }
         }
     } catch (error) {
-        console.error('Error loading claimed district:', error);
         const districtElement = document.getElementById('claimedDistrict');
         if (districtElement) {
-            districtElement.textContent = 'Error loading district';
+            districtElement.textContent = 'None';
         }
     }
 }
@@ -258,24 +231,61 @@ function viewReports() {
     window.location.href = 'reports.html';
 }
 
-function showMessage(message, type = 'info') {
+// Helper function to show messages
+function showMessage(message, type = 'success') {
     const messageDiv = document.createElement('div');
-    messageDiv.className = `${type}-message`;
+    messageDiv.className = `message ${type}`;
     messageDiv.textContent = message;
-    
-    document.querySelector('.profile-content').insertBefore(
-        messageDiv,
-        document.querySelector('.profile-content').firstChild
-    );
+    document.body.appendChild(messageDiv);
     
     setTimeout(() => {
         messageDiv.remove();
-    }, 5000);
+    }, 3000);
 }
 
 function updateUIForUser() {
-    // Update any UI elements based on user state
-    if (currentUser.isAdmin) {
-        document.getElementById('adminControls').style.display = 'block';
+    if (!currentUser) {
+        window.location.href = 'VCHouse2.html';
+        return;
+    }
+
+    // Update navigation menu
+    const userMenu = document.querySelector('.user-menu');
+    if (userMenu) {
+        userMenu.innerHTML = `
+            <span class="user-welcome">Welcome, ${currentUser.fullName}</span>
+            <button class="btn" onclick="logout()">Logout</button>
+        `;
+    }
+
+    // Update admin controls visibility
+    const adminControls = document.getElementById('adminControls');
+    if (adminControls) {
+        adminControls.style.display = currentUser.isAdmin ? 'block' : 'none';
+    }
+
+    // Update profile form visibility
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.style.display = 'block';
+    }
+}
+
+// Add logout function if not already present
+async function logout() {
+    try {
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            window.location.href = 'VCHouse2.html';
+        } else {
+            showMessage('Logout failed', 'error');
+        }
+    } catch (error) {
+        console.error('Error during logout:', error);
+        showMessage('Error during logout', 'error');
     }
 }

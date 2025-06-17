@@ -169,102 +169,114 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Update the registration form handling section
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        // Create registration data object with basic fields
-        const registrationData = {
-            username: document.getElementById('registerUsername').value,
-            fullName: document.getElementById('registerFullName').value,
-            email: document.getElementById('registerEmail').value,
-            party: document.getElementById('registerParty').value,
-            password: document.getElementById('registerPassword').value
-        };
+    // Registration form handling
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Registration form submitted'); // Debug log
+            
+            const errorDiv = document.getElementById('registerError');
+            const formData = new FormData(e.target);
+            
+            const registrationData = {
+                username: formData.get('username'),
+                fullName: formData.get('fullName'),
+                email: formData.get('email'),
+                party: formData.get('party'),
+                password: formData.get('password')
+            };
 
-        // Handle password confirmation
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        if (registrationData.password !== confirmPassword) {
-            document.getElementById('registerError').textContent = 'Passwords do not match';
-            return;
-        }
-
-        // Validate required fields (exclude portraitFile)
-        const requiredFields = ['username', 'fullName', 'email', 'party', 'password'];
-        const missingFields = requiredFields.filter(field => !registrationData[field]);
-        
-        if (missingFields.length > 0) {
-            document.getElementById('registerError').textContent = 
-                `Missing required fields: ${missingFields.join(', ')}`;
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_URL}/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(registrationData)
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                closeModal('registerModal');
-                showMessage('Registration successful! Please log in.');
-                document.getElementById('registerForm').reset();
-            } else {
-                document.getElementById('registerError').textContent = 
-                    data.message || 'Registration failed';
+            // Password confirmation check
+            if (formData.get('password') !== formData.get('confirmPassword')) {
+                errorDiv.textContent = 'Passwords do not match';
+                return;
             }
-        } catch (error) {
-            console.error('Registration error:', error);
-            document.getElementById('registerError').textContent = 
-                'An error occurred during registration';
-        }
-    });
+
+            console.log('Sending registration data:', registrationData); // Debug log
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registrationData),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                console.log('Registration response:', data); // Debug log
+                
+                if (response.ok) {
+                    closeModal('registerModal');
+                    showMessage('Registration successful! Please log in.');
+                    registerForm.reset();
+                } else {
+                    errorDiv.textContent = data.message || 'Registration failed';
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorDiv.textContent = 'An error occurred during registration';
+            }
+        });
+    }
+
+    // Add message display function if not already present
+    function showMessage(message, type = 'success') {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.textContent = message;
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
+    }
 
     // Update UI based on user state
     function updateUIForUser() {
         const userMenu = document.querySelector('.user-menu');
         if (currentUser) {
             userMenu.innerHTML = `
-                <span>Welcome, ${currentUser.fullName}</span>
+                <span class="user-welcome">Welcome, ${currentUser.fullName}</span>
+                <button class="btn" onclick="window.location.href='profile.html'">Profile</button>
                 <button class="btn" onclick="logout()">Logout</button>
             `;
         } else {
             userMenu.innerHTML = `
-                <button class="btn" id="loginBtn">Login</button>
-                <button class="btn" id="registerBtn">Register</button>
+                <button class="btn" onclick="openModal('loginModal')">Login</button>
+                <button class="btn" onclick="openModal('registerModal')">Register</button>
             `;
         }
     }
 
-    // Logout functionality
+    // Handle logout
     window.logout = async () => {
         try {
-            await fetch(`${API_URL}/logout`, {
+            const response = await fetch(`${API_URL}/logout`, {
                 method: 'POST',
                 credentials: 'include'
             });
-            currentUser = null;
-            updateUIForUser();
+            
+            if (response.ok) {
+                currentUser = null;
+                updateUIForUser();
+                window.location.reload();
+            }
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
 
-    // Button click handlers
-    document.getElementById('loginBtn').addEventListener('click', () => openModal('loginModal'));
-    document.getElementById('registerBtn').addEventListener('click', () => openModal('registerModal'));
-
-    // Check if user is already logged in
+    // Initialize auth status
     async function checkAuthStatus() {
         try {
             const response = await fetch(`${API_URL}/auth-status`, {
                 credentials: 'include'
             });
             const data = await response.json();
+            
             if (response.ok && data.user) {
                 currentUser = data.user;
                 updateUIForUser();
@@ -274,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Initialize auth status
+    // Initialize auth check
     checkAuthStatus();
 
     // Show detailed district information in the sidebar
@@ -284,12 +296,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let representativeName = 'Vacant';
         let party = 'Unknown';
         let partyClass = '';
+        let isVacant = true;
 
         if (representativeInfo && representativeInfo !== 'N/A') {
             const [name, partyWithParens] = representativeInfo.split(' (');
             representativeName = name;
             party = partyWithParens ? partyWithParens.replace(')', '') : 'Unknown';
             partyClass = party.toLowerCase();
+            isVacant = false;
         }
 
         const detailsContent = `
@@ -298,12 +312,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="representative-info">
                     <h2 class="representative-name">${representativeName}</h2>
                     <span class="party-badge ${partyClass}">${party}</span>
+                    <!-- Claim button removed -->
                     <a href="district.html?state=${state}&district=${district}" class="district-link">View Full Profile</a>
                 </div>
             </div>
         `;
 
         document.getElementById('districtContent').innerHTML = detailsContent;
+    }
+
+    // Add the claim district function
+    async function claimDistrict(state, district) {
+        if (!currentUser) {
+            showMessage('Please log in to claim a district', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/claim-district', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ state, district }),
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMessage('District claimed successfully!', 'success');
+                // Refresh the district display
+                showDistrictDetails(state, district);
+                // Update the map
+                loadDistrictData();
+            } else {
+                showMessage(data.message || 'Failed to claim district', 'error');
+            }
+        } catch (error) {
+            console.error('Error claiming district:', error);
+            showMessage('Error claiming district', 'error');
+        }
     }
 
     // Search functionality
@@ -368,4 +417,38 @@ document.addEventListener('DOMContentLoaded', () => {
         
         searchResults.style.display = 'block';
     }
+
+    // Add button event listeners
+    const loginButton = document.getElementById('loginBtn');
+    const registerButton = document.getElementById('registerBtn');
+
+    if (loginButton) {
+        loginButton.addEventListener('click', () => openModal('loginModal'));
+    }
+
+    if (registerButton) {
+        registerButton.addEventListener('click', () => openModal('registerModal'));
+    }
+
+    // Update openModal function to ensure it's globally accessible
+    window.openModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+        }
+    };
+
+    window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    // Update window click handler for modals
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    };
 });

@@ -469,6 +469,29 @@
             transform: translateY(-1px);
         }
 
+        .claim-district-btn {
+            display: inline-block;
+            background-color: var(--accent-gold);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .claim-district-btn:hover {
+            background-color: var(--primary-blue);
+            transform: translateY(-1px);
+        }
+
+        .claim-district-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
         /* Modal styles */
         .modal {
             display: none;
@@ -694,6 +717,13 @@
                     <h1 id="representativeName"></h1>
                     <span id="partyBadge" class="party-badge"></span>
                     <div id="districtStats" class="district-stats"></div>
+                    <!-- Add claim district button for vacant districts -->
+                    <div id="claimDistrictContainer"></div>
+                    <div class="district-actions">
+                            <button class="btn unclaim-district-btn" onclick="unclaimDistrict()">
+                                Unclaim District
+                            </button>
+                    </div>
                 </div>
                 <div class="biography">
                     <h2>Biography</h2>
@@ -728,7 +758,7 @@
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
+            <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
             <h2>Login to VCHouse.gov</h2>
             <form id="loginForm">
                 <div class="form-group">
@@ -748,35 +778,39 @@
     <!-- Registration Modal -->
     <div id="registerModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
+            <span class="close-modal" onclick="closeModal('registerModal')">&times;</span>
             <h2>Create an Account</h2>
             <form id="registerForm">
                 <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" name="username" required>
+                </div>
+                <div class="form-group">
                     <label for="registerFullName">Full Name</label>
-                    <input type="text" id="registerFullName" required>
+                    <input type="text" id="registerFullName" name="fullName" required>
                 </div>
                 <div class="form-group">
                     <label for="registerEmail">Email</label>
-                    <input type="email" id="registerEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" required>
+                    <input type="email" id="registerEmail" name="email" required>
                 </div>
                 <div class="form-group">
                     <label for="registerParty">Party</label>
-                    <select id="registerParty" required>
+                    <select id="registerParty" name="party" required>
                         <option value="">Select a party</option>
-                        <option value="Democrat">Democrat</option>
-                        <option value="Republican">Republican</option>
-                        <option value="Independent">Independent</option>
+                        <option value="D">Democratic</option>
+                        <option value="R">Republican</option>
+                        <option value="I">Independent</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="registerPortrait">Portrait</label>
-                    <input type="file" id="registerPortrait" accept="image/*" required>
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" name="password" required>
                 </div>
-                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                <div id="registerError" class="form-error"></div>
                 <button type="submit" class="btn">Create Account</button>
             </form>
         </div>

@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const session = require('express-session');
 const multer = require('multer');
 const path = require('path');
@@ -7,6 +8,23 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 
 const app = express();
+
+// Add CORS configuration before other middleware
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
+
+// Update storage configuration for multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'Portraits/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, `temp_${Date.now()}_${file.originalname}`);
+    }
+});
+const upload = multer({ storage: storage });
 
 // Initialize SQLite database
 const db = new sqlite3.Database('database.db', (err) => {
@@ -65,84 +83,18 @@ const db = new sqlite3.Database('database.db', (err) => {
                 });
             }
         });
-        
-        // Create new users table with all required columns
-        db.run(`CREATE TABLE IF NOT EXISTS users_new (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fullName TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            party TEXT NOT NULL,
-            portrait TEXT,
-            biography TEXT,
-            location TEXT,
-            website TEXT,
-            isAdmin BOOLEAN DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`, async (err) => {
-            if (err) {
-                console.error('Error creating new users table:', err);
-            } else {
-                // Check if old table exists
-                db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='users'", (err, result) => {
-                    if (err) {
-                        console.error('Error checking old table:', err);
-                        return;
-                    }
-
-                    if (result) {
-                        // Migrate data from old table to new table
-                        db.run(`INSERT INTO users_new (id, fullName, email, password, party, isAdmin, created_at)
-                                SELECT id, fullName, email, password, party, isAdmin, created_at FROM users`, (err) => {
-                            if (err) {
-                                console.error('Error migrating data:', err);
-                            } else {
-                                // Drop old table
-                                db.run('DROP TABLE users', (err) => {
-                                    if (err) {
-                                        console.error('Error dropping old table:', err);
-                                    } else {
-                                        // Rename new table to users
-                                        db.run('ALTER TABLE users_new RENAME TO users', (err) => {
-                                            if (err) {
-                                                console.error('Error renaming table:', err);
-                                            } else {
-                                                console.log('Database schema updated successfully');
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
     }
 });
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'Portraits/');
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
-    fileFilter: function (req, file, cb) {
-        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-            return cb(new Error('Only image files are allowed!'), false);
-        }
-        cb(null, true);
-    },
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    }
+// Add this to your database initialization section
+db.serialize(() => {
+    // Ensure users table has biography column
+    db.run(`
+        ALTER TABLE users ADD COLUMN biography TEXT;
+    `, (err) => {
+        // Ignore error if column already exists
+        console.log('Biography column check complete');
+    });
 });
 
 // Middleware
@@ -182,6 +134,46 @@ app.get('/api/auth-status', (req, res) => {
     } else {
         res.json({ user: null });
     }
+});
+
+app.get('/api/get-biography', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    console.log('Getting biography for user:', req.session.userId);
+
+    db.get('SELECT biography FROM users WHERE id = ?', [req.session.userId], (err, row) => {
+        if (err) {
+            console.error('Database error fetching biography:', err);
+            return res.status(500).json({ message: 'Error fetching biography' });
+        }
+
+        console.log('Biography data:', row);
+        res.json({ biography: row ? row.biography : null });
+    });
+});
+
+app.post('/api/save-biography', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const { biography } = req.body;
+    console.log('Saving biography for user:', req.session.userId, 'Biography:', biography);
+
+    db.run(
+        'UPDATE users SET biography = ? WHERE id = ?',
+        [biography, req.session.userId],
+        function(err) {
+            if (err) {
+                console.error('Error saving biography:', err);
+                return res.status(500).json({ message: 'Error saving biography' });
+            }
+            console.log('Biography saved successfully');
+            res.json({ message: 'Biography saved successfully' });
+        }
+    );
 });
 
 app.get('/api/get-biography', (req, res) => {
@@ -236,55 +228,33 @@ app.post('/api/update-biography', (req, res) => {
     }
 
     const { biography } = req.body;
-    if (!biography) {
-        return res.status(400).json({ message: 'Biography is required' });
-    }
     
-    // First get the user's full name and party
-    db.get('SELECT fullName, party FROM users WHERE id = ?', [req.session.userId], (err, user) => {
-        if (err) {
-            console.error('Error getting user:', err);
-            return res.status(500).json({ message: 'Failed to update biography' });
-        }
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Update the biography in the users table
-        db.run('UPDATE users SET biography = ? WHERE id = ?', 
-            [biography, req.session.userId],
-            function(err) {
-                if (err) {
-                    console.error('Error updating biography:', err);
-                    return res.status(500).json({ message: 'Failed to update biography' });
-                }
-
-                // Update the representatives data
-                const representativesPath = path.join(__dirname, 'representatives_new.json');
-                try {
-                    const representativesData = JSON.parse(fs.readFileSync(representativesPath, 'utf8'));
-                    
-                    // Find the district claimed by this user
-                    const claimedDistrict = Object.entries(representativesData).find(([_, value]) => 
-                        value && value.startsWith(user.fullName)
-                    );
-
-                    if (claimedDistrict) {
-                        // Update the biography in the district data
-                        const [districtKey] = claimedDistrict;
-                        representativesData[districtKey] = `${user.fullName} (${user.party.charAt(0)})`;
-                        fs.writeFileSync(representativesPath, JSON.stringify(representativesData, null, 2));
-                    }
-
-                    res.json({ success: true });
-                } catch (error) {
-                    console.error('Error updating representatives data:', error);
-                    res.status(500).json({ message: 'Failed to update biography' });
-                }
+    // Get user's district
+    db.get('SELECT district FROM representatives WHERE userId = ?', 
+        [req.session.userId], 
+        (err, row) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ message: 'Server error' });
             }
-        );
-    });
+
+            if (!row) {
+                return res.status(404).json({ message: 'No district found' });
+            }
+
+            // Update biography in representatives table
+            db.run('UPDATE representatives SET biography = ? WHERE userId = ?',
+                [biography, req.session.userId],
+                (err) => {
+                    if (err) {
+                        console.error('Error saving biography:', err);
+                        return res.status(500).json({ message: 'Failed to save biography' });
+                    }
+                    res.json({ message: 'Biography updated successfully' });
+                }
+            );
+        }
+    );
 });
 
 app.get('/api/claimed-district', (req, res) => {
@@ -377,48 +347,57 @@ app.post('/api/update-profile', (req, res) => {
     });
 });
 
-app.post('/api/update-portrait', upload.single('portrait'), (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ message: 'Not authenticated' });
-    }
-
-    if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
-    }
-
-    db.run(
-        'UPDATE users SET portrait = ? WHERE id = ?',
-        [req.file.filename, req.session.userId],
-        function(err) {
-            if (err) {
-                console.error('Error updating portrait:', err);
-                return res.status(500).json({ message: 'Failed to update portrait' });
-            }
-            res.json({ success: true, filename: req.file.filename });
+// Update the portrait upload endpoint
+app.post('/api/update-portrait', (req, res) => {
+    upload.single('portrait')(req, res, function(err) {
+        if (err) {
+            console.error('Upload error:', err);
+            return res.status(400).json({ message: err.message });
         }
-    );
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        // Use the districtKey sent from the client
+        const districtKey = req.body.districtKey;
+        if (!districtKey) {
+            fs.unlink(req.file.path, () => {});
+            return res.status(400).json({ message: 'No district key provided' });
+        }
+
+        try {
+            // Rename file to district key
+            const newPath = path.join(__dirname, 'Portraits', `${districtKey}.jpg`);
+            fs.renameSync(req.file.path, newPath);
+
+            res.json({
+                success: true,
+                filename: `${districtKey}.jpg`,
+                message: 'Portrait updated successfully'
+            });
+        } catch (error) {
+            if (req.file) {
+                fs.unlink(req.file.path, () => {});
+            }
+            console.error('Error processing portrait:', error);
+            res.status(500).json({ message: 'Failed to process portrait upload' });
+        }
+    });
 });
 
-app.post('/api/register', upload.single('portrait'), async (req, res) => {
+app.post('/api/register', async (req, res) => {
+    const { fullName, email, password, party } = req.body;
+
     try {
-        console.log('Registration request received:', req.body);
-        const { fullName, email, password, party } = req.body;
-        const portraitFile = req.file;
-
-        if (!fullName || !email || !password || !party || !portraitFile) {
-            console.log('Missing required fields:', { fullName, email, party, portraitFile });
-            return res.status(400).json({ message: 'All fields are required' });
-        }
-
-        // Check if email already exists
-        db.get('SELECT email FROM users WHERE email = ?', [email], async (err, row) => {
+        // Check if user already exists
+        db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
             if (err) {
                 console.error('Database error:', err);
-                return res.status(500).json({ message: 'Registration failed' });
+                return res.status(500).json({ message: 'Server error' });
             }
 
-            if (row) {
-                console.log('Email already registered:', email);
+            if (user) {
                 return res.status(400).json({ message: 'Email already registered' });
             }
 
@@ -427,21 +406,24 @@ app.post('/api/register', upload.single('portrait'), async (req, res) => {
 
             // Insert new user
             db.run(
-                'INSERT INTO users (fullName, email, password, party, portrait) VALUES (?, ?, ?, ?, ?)',
-                [fullName, email, hashedPassword, party, portraitFile.filename],
+                'INSERT INTO users (fullName, email, password, party) VALUES (?, ?, ?, ?)',
+                [fullName, email, hashedPassword, party],
                 function(err) {
                     if (err) {
                         console.error('Error creating user:', err);
-                        return res.status(500).json({ message: 'Registration failed' });
+                        return res.status(500).json({ message: 'Error creating account' });
                     }
-                    console.log('User registered successfully:', email);
-                    res.status(201).json({ message: 'Registration successful' });
+
+                    res.status(201).json({ 
+                        message: 'Registration successful',
+                        userId: this.lastID 
+                    });
                 }
             );
         });
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ message: 'Registration failed' });
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
@@ -662,6 +644,81 @@ app.post('/api/admin/update-user', (req, res) => {
     });
 });
 
+// Add this endpoint after your other API routes
+app.post('/api/unclaim-district', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const { state, district } = req.body;
+    const districtKey = `${state}-${district}`;
+
+    try {
+        // First verify the user owns this district
+        const representativesPath = path.join(__dirname, 'representatives_new.json');
+        const representativesData = JSON.parse(fs.readFileSync(representativesPath, 'utf8'));
+
+        // Get user info
+        db.get('SELECT fullName FROM users WHERE id = ?', [req.session.userId], (err, user) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ message: 'Server error' });
+            }
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Check if user owns this district
+            const currentRep = representativesData[districtKey];
+            if (!currentRep || !currentRep.startsWith(user.fullName)) {
+                return res.status(403).json({ message: 'You do not own this district' });
+            }
+
+            // Update representatives data
+            representativesData[districtKey] = 'N/A';
+            fs.writeFileSync(representativesPath, JSON.stringify(representativesData, null, 2));
+
+            // Delete portrait if it exists
+            const portraitPath = path.join(__dirname, 'Portraits', `${districtKey}.jpg`);
+            if (fs.existsSync(portraitPath)) {
+                fs.unlink(portraitPath, (err) => {
+                    if (err) console.error('Error deleting portrait:', err);
+                });
+            }
+
+            res.json({ 
+                success: true,
+                message: 'District unclaimed successfully'
+            });
+        });
+    } catch (error) {
+        console.error('Error in unclaim district:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Add this route before your static file serving
+app.get('/api/get-district-biography/:districtKey', (req, res) => {
+    const districtKey = req.params.districtKey;
+    
+    // Get the biography from representatives data
+    db.get(
+        'SELECT biography FROM representatives WHERE district = ?',
+        [districtKey],
+        (err, row) => {
+            if (err) {
+                console.error('Error fetching district biography:', err);
+                return res.status(500).json({ message: 'Error fetching biography' });
+            }
+
+            res.json({
+                biography: row?.biography || null
+            });
+        }
+    );
+});
+
 // Static file serving - moved after API routes
 app.use(express.static(__dirname));
 app.use('/Portraits', express.static(path.join(__dirname, 'Portraits'), {
@@ -692,4 +749,4 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-}); 
+});
