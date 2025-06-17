@@ -11,7 +11,7 @@ const app = express();
 
 // Add CORS configuration before other middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'https://dianallar.github.io',
     credentials: true
 }));
 
